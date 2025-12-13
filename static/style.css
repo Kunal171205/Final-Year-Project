@@ -1,0 +1,131 @@
+/* ---------- HTML and BODY (full height) ---------- */
+html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+body {
+    position: relative;
+}
+
+/* ---------- MAP (full screen behind everything) ---------- */
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    z-index: 0; /* Map stays at bottom */
+}
+
+
+.navbar-container {
+    position: absolute;
+    top: 150px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    
+    
+    border-radius: 24px;
+    z-index: 10;
+    
+}
+
+/* Each item */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: rgb(170, 208, 239);
+    padding: 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    width: 18px; /* collapsed width */
+    overflow: hidden;
+    transition: width 0.3s ease-in-out;
+}
+
+/* Item expands on hover */
+.nav-item:hover {
+    width: 100px; /* expanded width */
+}
+
+/* Icon size */
+.icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* Text is hidden until hover */
+.nav-text {
+    white-space: nowrap;
+    opacity: 0;
+    font-size: 1.2em;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Show text when hovered */
+.nav-item:hover .nav-text {
+    opacity: 1;
+}
+
+/*
+/* ---------- TOP ROW (name + search bar) ---------- */
+.toprow {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+
+    display: flex;
+    align-items: center;
+    gap: 25px; /* space between name & search bar */
+
+    z-index: 999;
+}
+
+/* Website Name Box */
+.site-name {
+    background: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 24px;
+    font-weight: bold;
+
+}
+
+/* ---------- SEARCH BAR ---------- */
+.floating-search {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    background: white;
+    padding: 10px 14px;
+    border-radius: 10px;
+
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+.search-icon {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.floating-search input {
+    border: none;
+    outline: none;
+    width: 290px;
+    font-size: 15px;
+}
+
