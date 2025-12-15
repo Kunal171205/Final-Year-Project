@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login | Industrial Explorer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="top-header">
+  <div class="site-name">Industrial Explorer</div>
+</header>
+
+<!-- LOGIN PAGE -->
+<section class="login-page">
+
+  <div class="login-card">
+    <h2>Welcome back</h2>
+    <p class="subtitle">Login and start exploring opportunities</p>
+
+    <!-- LOGIN FORM -->
+    <form method="POST" action="{{ url_for('Login') }}"> 
+      <label>Username</label>
+      <input type="text" name="Username" placeholder="Enter your username" required>
+
+      <label>Password</label>
+      <input type="password"  name="Password" placeholder="Enter your password" required>
+
+      <button type="submit" class="primary-btn">Login</button>
+
+    </form>
+
+    <!-- SOCIAL LOGIN -->
+    <button class="social google">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg">
+      Continue with Google
+    </button>
+
+    <button class="social microsoft">
+      <img src="https://www.svgrepo.com/show/448239/microsoft.svg">
+      Continue with Microsoft
+    </button>
+
+    <!-- DIVIDER -->
+    <div class="divider">OR</div>
+
+    <p class="helper">
+      Don’t have an account? 
+      <a href="{{ url_for('signup') }}">Sign up</a>
+    </p>
+  </div>
+
+</section>
+
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Industry Explorer</title>
+    <!-- Serve CSS via Flask static path so it loads on /login -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/LoginHomPageStyle.css') }}">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo">
+                <span class="logo-text">Industry<span class="logo-highlight">Explorer</span></span>
+            </div>
+            <nav class="header-nav">
+                <a href="#" class="nav-link">Products</a>
+                <a href="#" class="nav-link">Solutions</a>
+                <a href="#" class="nav-link">Resources</a>
+                <a href="#" class="nav-link">Pricing</a>
+                <a href="#" class="nav-link">Human Data</a>
+            </nav>
+            <div class="header-actions">
+                <a href="#" class="action-link">Log In</a>
+                <a href="#" class="btn-demo">Request Demo</a>
+                <a href="#" class="btn-signup">Create a free account</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="login-container-wrapper">
+        <div class="login-container">
+            
+            <div class="login-card">
+            <span class="badge">BUSINESS</span>
+            <h2>For <span class="highlight">Industry Partners</span></h2>
+            <p class="description">
+                Join thousands of local businesses. Post jobs, find B2B partners, 
+                and access trade finance tools to grow your regional economy.
+            </p>
+            
+            <a href="{{ url_for('Login') }}" class="btn-login">Login</a>
+
+            <div class="auth-footer">
+                <p>Don't have an account?</p>
+                <a href="{{ url_for('signup') }}" class="link-green">Register Company</a>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="login-card">
+            <div class="badge">PERSON</div> 
+            <h2>For <span class="highlight">Job Seekers</span></h2>
+            <p class="description">
+                Explore opportunities in your industrial area. Find relevant jobs, 
+                connect with employers, and build your career locally.
+            </p>
+            
+            <a href="{{ url_for('Login') }}" class="btn-login">Login</a>
+
+            <div class="auth-footer">
+                <p>Don't have an account?</p>
+                <a href="{{ url_for('signup') }}" class="link-green">Sign up</a>
+            </div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <!-- footer        -->
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            
+            <div class="footer-col brand-col">
+                <h3>Industry Explorer</h3>
+                <p class="mission-text">
+                    Bridging the gap between local industries, talent, and global trade. 
+                    We empower regional economic development through data, connection, and financial tools.
+                </p>
+                <div class="social-links">
+                    <a href="#">LinkedIn</a>
+                    <a href="#">Twitter</a>
+                    <a href="#">Facebook</a>
+                </div>
+            </div>
+    
+            <div class="footer-col">
+                <h4>Platform</h4>
+                <ul>
+                    <li><a href="#">Interactive Map</a></li>
+                    <li><a href="#">Job Board</a></li>
+                    <li><a href="#">B2B Directory</a></li>
+                    <li><a href="#">Trade Finance Tools</a></li>
+                </ul>
+            </div>
+    
+            <div class="footer-col">
+                <h4>For Business</h4>
+                <ul>
+                    <li><a href="#">Post a Job</a></li>
+                    <li><a href="#">Verify Company</a></li>
+                    <li><a href="#">Export Calculators</a></li>
+                    <li><a href="#">Partner with Us</a></li>
+                </ul>
+            </div>
+    
+            <div class="footer-col">
+                <h4>Support</h4>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Contact Support</a></li>
+                </ul>
+            </div>
+    
+        </div>
+    
+        <div class="footer-bottom">
+            <p>&copy; 2024 Industry Explorer. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

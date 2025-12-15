@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Post Trade | Industrial Explorer</title>
+  <link rel="stylesheet" href="{{url_for('static', filename='css/b2b.css')}}">
+</head>
+<body>
+
+<header class="top-header">
+  <div class="logo">Industrial Explorer</div>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">Job Portal</a>
+    <a href="#">B2B Trade</a>
+    <a href="#">Profile</a>
+  </nav>
+</header>
+
+<section class="form-page">
+
+  <div class="form-card">
+    <h2>Post Sell Requirement</h2>
+
+    <form>
+
+      <label>Product / Service</label>
+      <input type="text" placeholder="Steel rods / Packaging service" required>
+
+      <label>Category</label>
+      <select>
+        <option>Raw Material</option>
+        <option>Machinery</option>
+        <option>Electrical</option>
+        <option>Services</option>
+      </select>
+
+      <label>Quantity / Capacity</label>
+      <input type="text" placeholder="500 kg / Monthly service">
+
+      <label>Location (MIDC)</label>
+      <select>
+        <option>Chakan MIDC</option>
+        <option>Pimpri MIDC</option>
+        <option>Talegaon MIDC</option>
+      </select>
+
+      <label>Expected Price</label>
+      <input type="text" placeholder="₹ / Negotiable">
+
+      <label>Description</label>
+      <textarea rows="4"></textarea>
+
+      <button type="submit">Post Trade</button>
+    </form>
+
+  </div>
+
+</section>
+
+</body>
+</html>

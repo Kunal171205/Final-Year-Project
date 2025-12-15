@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Apply Job | Industrial Explorer</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/apply-job.css') }}">
+ 
+</head>
+<body>
+
+
+<header class="top-header">
+  <div class="logo">Industrial Explorer</div>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">Job Portal</a>
+    <a href="#">B2B Trade</a>
+    <a href="#">Profile</a>
+  </nav>
+</header>
+
+<!-- PAGE CONTENT -->
+<div class="page-container">
+
+  <!-- JOB DETAILS -->
+  <div class="job-summary">
+    <h3>Machine Operator</h3>
+    <p>ABC Industries – Chakan MIDC</p>
+    <span>Day Shift • ₹15,000 – ₹18,000</span>
+  </div>
+
+  <!-- APPLY FORM -->
+  <div class="apply-card">
+    <h4>Apply for this Job</h4>
+
+    <form>
+
+      <label>Full Name</label>
+      <input type="text" placeholder="Enter your name" required>
+
+      <label>Phone Number</label>
+      <input type="tel" placeholder="+91 XXXXXXXXXX" required>
+
+      <label>Age</label>
+      <input type="number" min="18" max="60" placeholder="Enter your age" required>
+
+      <label>Gender</label>
+      <select required>
+        <option value="">Select gender</option>
+        <option>Male</option>
+        <option>Female</option>
+        <option>Other</option>
+      </select>
+
+      <label>Skill / Job Type</label>
+      <select required>
+        <option>Factory Worker</option>
+        <option>Machine Operator</option>
+        <option>Welder</option>
+        <option>Electrician</option>
+        <option>Helper</option>
+      </select>
+
+      <label>Experience</label>
+      <select>
+        <option>Fresher</option>
+        <option>1–2 Years</option>
+        <option>2+ Years</option>
+      </select>
+
+      <label>Expected Salary (per month)</label>
+      <input type="text" placeholder="₹12,000 – ₹20,000" required>
+
+      <button type="submit">Apply Job</button>
+
+    </form>
+
+    <p class="note">
+      The company will contact you directly.
+    </p>
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Post Job | Industrial Explorer</title>
+  <link rel="stylesheet" href="{{url_for('static' ,filename = 'css/post-job.css') }}">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="top-header">
+  <div class="logo">Industrial Explorer</div>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">Job portal</a>
+    <a href="#">B2b Trade</a>
+    <a href="#">Profile</a>
+  </nav>
+</header>
+
+<!-- PAGE -->
+<section class="post-page">
+
+  <div class="post-card">
+    <h2>Post a Job</h2>
+    <p class="subtitle">Hire workers from nearby MIDC areas</p>
+
+    <form>
+
+      <label>Job Title</label>
+      <input type="text" placeholder="Machine Operator" required>
+
+      <label>Job Category</label>
+      <select required>
+        <option>Factory Worker</option>
+        <option>Machine Operator</option>
+        <option>Welder</option>
+        <option>Electrician</option>
+        <option>Helper</option>
+      </select>
+
+      <label>Location (MIDC)</label>
+      <select required>
+        <option>Chakan MIDC</option>
+        <option>Pimpri MIDC</option>
+        <option>Talegaon MIDC</option>
+        <option>Bhosari MIDC</option>
+      </select>
+
+      <label>Experience Required</label>
+      <select>
+        <option>Fresher</option>
+        <option>1–2 Years</option>
+        <option>2+ Years</option>
+      </select>
+
+      <label>Shift Type</label>
+      <select>
+        <option>Day Shift</option>
+        <option>Night Shift</option>
+        <option>Rotational</option>
+      </select>
+
+      <label>Salary Range</label>
+      <input type="text" placeholder="₹12,000 – ₹18,000">
+
+      <label>Contact Number</label>
+      <input type="text" placeholder="+91 XXXXXXXXXX" required>
+
+      <label>Job Description</label>
+      <textarea rows="4" placeholder="Work details, overtime, benefits..." required></textarea>
+
+      <button type="submit">Post Job</button>
+
+    </form>
+  </div>
+
+</section>
+
+</body>
+</html>

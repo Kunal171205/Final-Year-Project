@@ -2,8 +2,7 @@
 <html>
 <head>
     <title>My First Website</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
  
 </head>
 
@@ -16,6 +15,7 @@
         <button class="search-icon">🔍</button>
         <input id="search-box" type="text" placeholder="Search location..." />
     </div>
+
 </div>
 
    
@@ -23,63 +23,17 @@
     <!-- This is where the map will appear -->
     <div id="map" style="background-color: #e5e5e5;"></div>
     
-    <!-- Google Maps Script -->
+    <!-- External Map JavaScript File -->
+    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+    
+    
+  
+
     <script>
-    // Define initMap function BEFORE loading the API script
-    function initMap() {
-      console.log("initMap called");
-      try {
-        // Check if Google Maps API is loaded
-        if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-          console.error("Google Maps API not loaded!");
-          document.getElementById("map").innerHTML = '<div style="padding: 20px; text-align: center; color: red;">Google Maps API failed to load. Please check your API key.</div>';
-          return;
-        }
-
-        // center map (example: Pune)
-        const center = { lat: 18.5204, lng: 73.8567 };
-        const mapElement = document.getElementById("map");
-        
-        if (!mapElement) {
-          console.error("Map element not found!");
-          return;
-        }
-
-        console.log("Creating map...");
-        const map = new google.maps.Map(mapElement, {
-          center,
-          zoom: 13,
-          mapTypeControl: false,
-          streetViewControl: false,
-        });
-
-        // optional: a marker at the center
-        new google.maps.Marker({
-          position: center,
-          map,
-          title: "Center"
-        });
-        
-        console.log("Map initialized successfully!");
-      } catch (error) {
-        console.error("Error initializing map:", error);
-        document.getElementById("map").innerHTML = '<div style="padding: 20px; text-align: center; color: red;">Error: ' + error.message + '</div>';
-      }
-    }
-    
-    // Handle API loading errors
-    window.gm_authFailure = function() {
-      console.error("Google Maps API authentication failed. Please check your API key.");
-      const mapElement = document.getElementById("map");
-      if (mapElement) {
-        mapElement.innerHTML = '<div style="padding: 20px; text-align: center; color: red; background: white; border-radius: 10px; margin: 20px;">Google Maps API authentication failed. Please check your API key in the HTML file.</div>';
-      }
-    };
-    
-    // Load Google Maps API script
     window.addEventListener('load', function() {
       const script = document.createElement('script');
-      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAY3_ORuFPOhyOhMs2oFLGq9XzOJmxMGY4&callback=initMap';
+      // Include libraries for places, geometry, and directions
+      script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAY3_ORuFPOhyOhMs2oFLGq9XzOJmxMGY4&callback=initMap&libraries=places,geometry,directions';
       script.async = true;
       script.defer = true;
       script.onerror = function() {
@@ -90,32 +44,95 @@
     });
     </script>
 
-<div class="navbar-container">
-  <div class="nav-item">
+  <div class="navbar-container">
+    <div class="nav-item">
       <img src="{{ url_for('static', filename='images/home.png') }}" class="icon">
       <span class="nav-text">Home</span>
   </div>
 
   <div class="nav-item">
     <img src="{{ url_for('static', filename='images/job-portal.png') }}" class="icon">
-    <span class="nav-text">Job Portal</span>
+    <span class="nav-text">
+        <a href="{{ url_for('jobportal') }}">Job Portal</a>
+    </span>
     </div>
+
   <div class="nav-item">
     <img src="{{ url_for('static', filename='images/buy.png') }}" class="icon">
     <span class="nav-text">B2B Trade</span>
   </div>
 
   <div class="nav-item">
-      <img src="{{ url_for('static', filename='images/account.png') }}" class="icon">
-      <span class="nav-text">Profile</span>
-  </div>
+    <img src="{{ url_for('static', filename='images/account.png') }}" class="icon">
+    <span class="nav-text">
+        <a href="{{ url_for('logintype') }}">Login</a>
+    </span>
+</div>
+
 
   <div class="nav-item">
       <img src="{{ url_for('static', filename='images/setting.png') }}" class="icon">
       <span class="nav-text">Settings</span>
-  </div>
+    </div>
 </div>
+    
+    <!-- footer        -->
 
+  
+    <!-- footer        -->
+
+    <footer class="site-footer">
+      <div class="footer-container">
+          
+          <div class="footer-col brand-col">
+              <h3>Industry Explorer</h3>
+              <p class="mission-text">
+                  Bridging the gap between local industries, talent, and global trade. 
+                  We empower regional economic development through data, connection, and financial tools.
+              </p>
+              <div class="social-links">
+                  <a href="#">LinkedIn</a>
+                  <a href="#">Twitter</a>
+                  <a href="#">Facebook</a>
+              </div>
+          </div>
+  
+          <div class="footer-col">
+              <h4>Platform</h4>
+              <ul>
+                  <li><a href="#">Interactive Map</a></li>
+                  <li><a href="#">Job Board</a></li>
+                  <li><a href="#">B2B Directory</a></li>
+                  <li><a href="#">Trade Finance Tools</a></li>
+              </ul>
+          </div>
+  
+          <div class="footer-col">
+              <h4>For Business</h4>
+              <ul>
+                  <li><a href="#">Post a Job</a></li>
+                  <li><a href="#">Verify Company</a></li>
+                  <li><a href="#">Export Calculators</a></li>
+                  <li><a href="#">Partner with Us</a></li>
+              </ul>
+          </div>
+  
+          <div class="footer-col">
+              <h4>Support</h4>
+              <ul>
+                  <li><a href="#">Help Center</a></li>
+                  <li><a href="#">Privacy Policy</a></li>
+                  <li><a href="#">Terms of Service</a></li>
+                  <li><a href="#">Contact Support</a></li>
+              </ul>
+          </div>
+  
+      </div>
+  
+      <div class="footer-bottom">
+          <p>&copy; 2024 Industry Explorer. All rights reserved.</p>
+      </div>
+  </footer>
 
 </body>
 </html>

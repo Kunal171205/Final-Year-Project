@@ -1,0 +1,191 @@
+* {
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body {
+  margin: 0;
+  background: none;
+}
+
+/* MAP BACKGROUND */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("/map-bg.png") center/cover no-repeat;
+  filter: blur(0.007px);
+  transform: scale(1.05);
+  z-index: -2;
+}
+
+/* OVERLAY */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.45);
+  z-index: -1;
+}
+
+/* HEADER */
+.top-header {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  /* background: rgba(255,255,255,0.95); */
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.site-name {
+  font-size: 22px;
+  font-weight: 700;
+  color: #000;
+}
+
+/* PAGE */
+.login-page {
+  min-height: calc(100vh - 70px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* CARD */
+.login-card {
+  width: 460px;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+}
+
+/* TEXT */
+.login-card h2 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  text-align: center;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 25px;
+}
+
+/* FORM */
+label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 18px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+input:focus {
+  outline: none;
+  border-color: #2e7d32;
+}
+
+/* PRIMARY BUTTON */
+.primary-btn {
+  width: 100%;
+  padding: 12px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  margin-bottom: 18px;
+}
+
+.primary-btn:hover {
+  opacity: 0.9;
+}
+
+/* SOCIAL BUTTONS */
+.social {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.social img {
+  width: 18px;
+  height: 18px;
+}
+
+.social:hover {
+  background: #f5f5f5;
+}
+
+/* DIVIDER */
+.divider {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 12px;
+  color: #666;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  height: 1px;
+  width: 40%;
+  background: #ccc;
+  position: absolute;
+  top: 50%;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+/* HELPER */
+.helper {
+  text-align: center;
+  font-size: 14px;
+}
+
+.helper a {
+  color: #2e7d32;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.helper a:hover {
+  text-decoration: underline;
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .login-card {
+    width: 90%;
+    padding: 30px;
+  }
+}

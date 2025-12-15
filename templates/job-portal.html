@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Job Portal | Industrial Explorer</title>
+  <link rel="stylesheet" href="{{url_for('static' , filename='css/job-portal.css') }}">
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="top-header">
+  <div class="logo">Industrial Explorer</div>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">Job Portal</a>
+    <a href="#">B2B Trade</a>
+    <a href="#">Profile</a>
+  </nav>
+</header>
+
+<!-- MAIN -->
+<div class="job-page">
+
+  <!-- FILTER PANEL -->
+  <aside class="filters">
+    <h3>Filter Jobs</h3>
+
+    <label>Location</label>
+    <select>
+      <option>All MIDC</option>
+      <option>Chakan MIDC</option>
+      <option>Pimpri MIDC</option>
+      <option>Talegaon MIDC</option>
+    </select>
+
+    <label>Job Type</label>
+    <select>
+      <option>All</option>
+      <option>Factory Worker</option>
+      <option>Machine Operator</option>
+      <option>Welder</option>
+      <option>Helper</option>
+    </select>
+
+    <label>Shift</label>
+    <select>
+      <option>Any</option>
+      <option>Day</option>
+      <option>Night</option>
+      <option>Rotational</option>
+    </select>
+
+    <button class="apply-filter">Apply Filters</button>
+  </aside>
+
+  <!-- JOB LIST -->
+  <main class="job-list">
+
+    <!-- SEARCH -->
+    <div class="search-bar">
+      <input type="text" placeholder="Search job title or company...">
+    </div>
+
+    <!-- JOB CARD -->
+    <div class="job-card">
+      <h4>Machine Operator</h4>
+      <p class="company">ABC Industries – Chakan MIDC</p>
+
+      <div class="job-info">
+        <span>💼 1–2 Years</span>
+        <span>⏰ Day Shift</span>
+        <span>💰 ₹15,000 – ₹18,000</span>
+      </div>
+
+      <button>Apply</button>
+    </div>
+
+    <div class="job-card">
+      <h4>Factory Helper</h4>
+      <p class="company">XYZ Manufacturing – Pimpri MIDC</p>
+
+      <div class="job-info">
+        <span>💼 Fresher</span>
+        <span>⏰ Rotational</span>
+        <span>💰 ₹12,000 – ₹14,000</span>
+      </div>
+
+      <button>Apply</button>
+    </div>
+
+    <div class="job-card">
+      <h4>Welder</h4>
+      <p class="company">SteelWorks Pvt Ltd – Talegaon MIDC</p>
+
+      <div class="job-info">
+        <span>💼 2+ Years</span>
+        <span>⏰ Day Shift</span>
+        <span>💰 ₹18,000 – ₹22,000</span>
+      </div>
+
+      <button>Apply</button>
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+</html>

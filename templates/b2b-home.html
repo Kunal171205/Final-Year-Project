@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>B2B Trade | Industrial Explorer</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/b2b.css') }}">
+</head>
+<body>
+
+<header class="top-header">
+  <div class="logo">Industrial Explorer</div>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">Job Portal</a>
+    <a href="#">B2B Trade</a>
+    <a href="#">Profile</a>
+  </nav>
+</header>
+
+<section class="center-page">
+
+  <div class="choice-card">
+    <h2>Sell Raw Material</h2>
+    <p>Post materials you want to sell to nearby industries.</p>
+    <a href="{{url_for('b2bpost')}}" class="btn black">Post Material</a>
+  </div>
+
+  <div class="choice-card">
+    <h2>Buy Raw Material</h2>
+    <p>Find materials available from nearby industries.</p>
+    <a href="{{url_for('buyerlist') }}" class="btn green">View Materials</a>
+  </div>
+
+</section>
+
+</body>
+</html>
