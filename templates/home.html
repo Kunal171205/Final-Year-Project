@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Industry Explorer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="main-header fade-down">
+    <div class="logo">IndusTech</div>
+
+    <div class="header-search">
+        <input id="search-box" type="text" placeholder="Search location...">
+    </div>
+
+    <nav class="top-nav">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a href="{{ url_for('jobportal') }}">Job Portal</a>
+        <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
+        <a href="{{ url_for('logintype') }}">Login</a>
+    </nav>
+</header>
+
+<!-- ================= MAIN ================= -->
+<div class="main-layout">
+
+    <!-- ===== FILTER PANEL ===== -->
+    <aside class="filter-panel slide-left">
+        <h3>Map Filters</h3>
+
+        <label>Industry Type</label>
+        <select>
+            <option>All</option>
+            <option>Manufacturing</option>
+            <option>IT</option>
+            <option>Pharma</option>
+            <option>Textile</option>
+        </select>
+
+        <label>Area</label>
+        <select>
+            <option>All</option>
+            <option>MIDC Pune</option>
+            <option>Chakan</option>
+            <option>Ranjangaon</option>
+        </select>
+
+        <button class="apply-filter">Apply Filters</button>
+    </aside>
+
+    <!-- ===== MAP CARD ===== -->
+    <main class="map-container fade-up">
+        <div class="map-card">
+            <div id="map"></div>
+        </div>
+    </main>
+
+</div>
+
+<footer class="site-footer fade-up">
+    © 2024 Industry Explorer. All rights reserved.
+</footer>
+
+<!-- ================= MAP SCRIPTS ================= -->
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
+
+<script>
+window.addEventListener('load', function () {
+    const script = document.createElement('script');
+    script.src =
+      'https://maps.googleapis.com/maps/api/js?key=AIzaSyAY3_ORuFPOhyOhMs2oFLGq9XzOJmxMGY4&callback=initMap&libraries=places,geometry,directions';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+});
+</script>
+
+</body>
+</html>

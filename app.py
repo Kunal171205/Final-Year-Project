@@ -7,8 +7,8 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key")
 
 
 @app.route("/")
-def index():
-    return render_template("index.html")
+def home():
+    return render_template("home.html")
 
 @app.route("/signup", methods = ["GET","POST"])
 def signup():
@@ -21,25 +21,46 @@ def signup():
 
         session["user"] = username
         
-        return redirect(url_for("index"))
+        return redirect(url_for("home"))
     
     return render_template("signup.html")
+
+@app.route("/businesssignup", methods = ["GET","POST"])
+def businesssignup():
+
+    if request.method == "POST":
+        username = request.form.get("Username")
+        email = request.form.get("Email")
+        password =  request.form.get("Password")
+        phone =  request.form.get("phone")
+
+        session["user"] = username
+        
+        return redirect(url_for("home"))
+    
+    return render_template("signup-business.html")
+
 
 
 @app.route("/loginpage", methods=["GET", "POST"])
 def Login():
 
+    # Get user type: from query string on GET, from form on POST
     if request.method == "POST":
+        user_type = request.form.get("user_type", "seeker")
         username = request.form.get("Username")
-        password =  request.form.get("Password")
+        password = request.form.get("Password")
 
-        if username == "admin" and password =="123":
+        if username == "admin" and password == "123":
             session["user"] = username
-            return  redirect(url_for("index"))
+            return redirect(url_for("home"))
         else:
+            # In a real app you'd likely re-render the template with an error message
             return Response("invalid")
 
-    return render_template("login.html")
+    # For GET, read from URL parameters so LoginHomePage can pass ?user_type=...
+    user_type = request.args.get("user_type", "seeker")
+    return render_template("login.html", user_type=user_type)
 
 
 
@@ -58,11 +79,11 @@ def applyjob():
 def b2bhome():
     return render_template("b2b-home.html")
 
-@app.route("/postb2b", methods = ["GET","POST"])
+@app.route("/b2bsell", methods = ["GET","POST"])
 def b2bpost():
     return render_template("b2b-post.html")
 
-@app.route("/buyerlist", methods = ["GET","POST"])
+@app.route("/b2bbuy", methods = ["GET","POST"])
 def buyerlist():
     return render_template("buyer-list.html")
 

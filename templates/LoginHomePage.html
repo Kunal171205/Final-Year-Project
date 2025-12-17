@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Industry Explorer</title>
-    <!-- Serve CSS via Flask static path so it loads on /login -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/LoginHomPageStyle.css') }}">
 </head>
 <body>
@@ -14,55 +13,53 @@
             <div class="logo">
                 <span class="logo-text">Industry<span class="logo-highlight">Explorer</span></span>
             </div>
-            <nav class="header-nav">
-                <a href="#" class="nav-link">Products</a>
-                <a href="#" class="nav-link">Solutions</a>
-                <a href="#" class="nav-link">Resources</a>
-                <a href="#" class="nav-link">Pricing</a>
-                <a href="#" class="nav-link">Human Data</a>
-            </nav>
+            
             <div class="header-actions">
                 <a href="#" class="action-link">Log In</a>
-                <a href="#" class="btn-demo">Request Demo</a>
                 <a href="#" class="btn-signup">Create a free account</a>
             </div>
         </div>
     </header>
 
     <div class="login-container-wrapper">
+        <div class="floating-accents">
+            <span class="accent accent-1"></span>
+            <span class="accent accent-2"></span>
+            <span class="accent accent-3"></span>
+        </div>
         <div class="login-container">
             
             <div class="login-card">
-            <span class="badge">BUSINESS</span>
+            <span class="badge">Business</span>
             <h2>For <span class="highlight">Industry Partners</span></h2>
             <p class="description">
                 Join thousands of local businesses. Post jobs, find B2B partners, 
                 and access trade finance tools to grow your regional economy.
             </p>
             
-            <a href="{{ url_for('Login') }}" class="btn-login">Login</a>
+            <a href="{{ url_for('Login',user_type='business') }}" class="btn-login">Login</a> 
 
             <div class="auth-footer">
                 <p>Don't have an account?</p>
-                <a href="{{ url_for('signup') }}" class="link-green">Register Company</a>
+                <a href="{{ url_for('businesssignup') }}"" class="link-green">Register Company</a> 
             </div>
         </div>
 
         <div class="divider"></div>
 
         <div class="login-card">
-            <div class="badge">PERSON</div> 
+            <span class="badge">Job Seeker</span>
             <h2>For <span class="highlight">Job Seekers</span></h2>
             <p class="description">
                 Explore opportunities in your industrial area. Find relevant jobs, 
                 connect with employers, and build your career locally.
             </p>
             
-            <a href="{{ url_for('Login') }}" class="btn-login">Login</a>
+            <a href="{{ url_for('Login',user_type='seeker') }}" class="btn-login">Login</a> 
 
             <div class="auth-footer">
                 <p>Don't have an account?</p>
-                <a href="{{ url_for('signup') }}" class="link-green">Sign up</a>
+                <a href="{{url_for('signup') }}" class="link-green">Sign up</a> 
             </div>
             </div>
 
@@ -125,6 +122,81 @@
             <p>&copy; 2024 Industry Explorer. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Anime.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js" integrity="sha512-98IhC2kE0YxFgtwH5oIsDFtFwNmyhVd5E5AiSnCqjNStUwpCf7YJ7r0v4P/etIS4lMafF1nc+M+RyM5VB8Q0jQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tl = anime.timeline({
+                easing: 'easeOutExpo',
+                duration: 900
+            });
+
+            tl.add({
+                targets: '.main-header',
+                translateY: [-24, 0],
+                opacity: [0, 1]
+            }).add({
+                targets: '.login-card',
+                translateY: [36, 0],
+                opacity: [0, 1],
+                delay: anime.stagger(150)
+            }, '-=300').add({
+                targets: '.divider',
+                scaleY: [0, 1],
+                opacity: [0, 1]
+            }, '-=450').add({
+                targets: '.site-footer',
+                translateY: [24, 0],
+                opacity: [0, 1]
+            }, '-=300');
+
+            // Gentle float for background accents
+            anime({
+                targets: '.accent',
+                translateY: [-14, 14],
+                direction: 'alternate',
+                easing: 'easeInOutSine',
+                duration: 4200,
+                delay: anime.stagger(200),
+                loop: true
+            });
+
+            // Add a tactile hover bounce on primary buttons
+            document.querySelectorAll('.btn-login').forEach(btn => {
+                btn.addEventListener('mouseenter', () => {
+                    anime.remove(btn);
+                    anime({
+                        targets: btn,
+                        scale: 1.04,
+                        duration: 180,
+                        easing: 'easeOutQuad'
+                    });
+                });
+                btn.addEventListener('mouseleave', () => {
+                    anime.remove(btn);
+                    anime({
+                        targets: btn,
+                        scale: 1,
+                        duration: 180,
+                        easing: 'easeOutQuad'
+                    });
+                });
+            });
+
+            // Subtle attention on badges
+            anime({
+                targets: '.badge',
+                scale: [1, 1.06],
+                direction: 'alternate',
+                easing: 'easeInOutSine',
+                duration: 1600,
+                loop: true,
+                delay: 600
+            });
+        });
+    </script>
 
 </body>
 </html>

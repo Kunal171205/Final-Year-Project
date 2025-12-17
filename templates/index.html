@@ -47,7 +47,9 @@
   <div class="navbar-container">
     <div class="nav-item">
       <img src="{{ url_for('static', filename='images/home.png') }}" class="icon">
-      <span class="nav-text">Home</span>
+      <span class="nav-text">
+        <a href="{{ url_for('index') }}">Home</a>
+    </span>
   </div>
 
   <div class="nav-item">
@@ -59,7 +61,9 @@
 
   <div class="nav-item">
     <img src="{{ url_for('static', filename='images/buy.png') }}" class="icon">
-    <span class="nav-text">B2B Trade</span>
+    <span class="nav-text">
+        <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
+    </span>
   </div>
 
   <div class="nav-item">
@@ -70,10 +74,7 @@
 </div>
 
 
-  <div class="nav-item">
-      <img src="{{ url_for('static', filename='images/setting.png') }}" class="icon">
-      <span class="nav-text">Settings</span>
-    </div>
+  
 </div>
     
     <!-- footer        -->

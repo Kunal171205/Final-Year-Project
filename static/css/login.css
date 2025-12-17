@@ -1,41 +1,29 @@
+/* =========================
+   RESET & BASE
+========================= */
 * {
   box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
 body {
   margin: 0;
-  background: none;
+  background: #f5f5f5;
+  min-height: 100vh;
 }
 
-/* MAP BACKGROUND */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: url("/map-bg.png") center/cover no-repeat;
-  filter: blur(0.007px);
-  transform: scale(1.05);
-  z-index: -2;
-}
-
-/* OVERLAY */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: rgba(255,255,255,0.45);
-  z-index: -1;
-}
-
-/* HEADER */
+/* =========================
+   HEADER (CLEAN & SEPARATE)
+========================= */
 .top-header {
-  height: 70px;
+  height: 60px;
   display: flex;
   align-items: center;
   padding: 0 40px;
-  /* background: rgba(255,255,255,0.95); */
+  background: #ffffff;
   border-bottom: 1px solid #e0e0e0;
+  position: relative;
+  z-index: 10;
 }
 
 .site-name {
@@ -44,29 +32,61 @@ body::after {
   color: #000;
 }
 
-/* PAGE */
+/* =========================
+   LOGIN PAGE (BACKGROUND HERE)
+========================= */
 .login-page {
-  min-height: calc(100vh - 70px);
+  position: relative;
+  min-height: calc(100vh - 30px);
   display: flex;
-  align-items: center;
+  align-items: flex-start;  
   justify-content: center;
+  padding-top: 30px;        
+  overflow: hidden;
 }
 
-/* CARD */
+/* Blurred map background */
+.login-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("../images/map-bg.png") center/cover no-repeat;
+  filter: blur(14px);
+  transform: scale(1.1);
+  z-index: 0;
+}
+
+/* Light overlay */
+.login-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.45);
+  z-index: 0;
+}
+
+/* =========================
+   LOGIN CARD
+========================= */
 .login-card {
   width: 460px;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
   padding: 40px;
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+  position: relative;
+  z-index: 1;
 }
 
-/* TEXT */
+/* =========================
+   TEXT
+========================= */
 .login-card h2 {
   margin: 0 0 6px;
   font-size: 26px;
   text-align: center;
+  font-weight: 700;
 }
 
 .subtitle {
@@ -76,7 +96,9 @@ body::after {
   margin-bottom: 25px;
 }
 
-/* FORM */
+/* =========================
+   FORM
+========================= */
 label {
   display: block;
   font-weight: 600;
@@ -90,6 +112,7 @@ input {
   margin-bottom: 18px;
   border-radius: 8px;
   border: 1px solid #ccc;
+  font-size: 14px;
 }
 
 input:focus {
@@ -97,7 +120,9 @@ input:focus {
   border-color: #2e7d32;
 }
 
-/* PRIMARY BUTTON */
+/* =========================
+   PRIMARY BUTTON
+========================= */
 .primary-btn {
   width: 100%;
   padding: 12px;
@@ -106,15 +131,19 @@ input:focus {
   border: none;
   border-radius: 10px;
   font-size: 15px;
+  font-weight: 600;
   cursor: pointer;
   margin-bottom: 18px;
+  transition: background 0.2s;
 }
 
 .primary-btn:hover {
-  opacity: 0.9;
+  background: #333;
 }
 
-/* SOCIAL BUTTONS */
+/* =========================
+   SOCIAL BUTTONS
+========================= */
 .social {
   width: 100%;
   padding: 10px;
@@ -128,6 +157,7 @@ input:focus {
   gap: 10px;
   cursor: pointer;
   font-weight: 600;
+  transition: background 0.2s;
 }
 
 .social img {
@@ -139,7 +169,9 @@ input:focus {
   background: #f5f5f5;
 }
 
-/* DIVIDER */
+/* =========================
+   DIVIDER
+========================= */
 .divider {
   text-align: center;
   margin: 20px 0;
@@ -166,7 +198,9 @@ input:focus {
   right: 0;
 }
 
-/* HELPER */
+/* =========================
+   HELPER TEXT
+========================= */
 .helper {
   text-align: center;
   font-size: 14px;
@@ -182,10 +216,16 @@ input:focus {
   text-decoration: underline;
 }
 
-/* RESPONSIVE */
+/* =========================
+   RESPONSIVE
+========================= */
 @media (max-width: 480px) {
   .login-card {
     width: 90%;
     padding: 30px;
+  }
+
+  .top-header {
+    padding: 0 20px;
   }
 }

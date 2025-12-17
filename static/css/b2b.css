@@ -1,16 +1,16 @@
 * {
   box-sizing: border-box;
-  font-family: "Segoe UI", sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
 body {
   margin: 0;
-  background: #f5f5f5;
+  background: none;
 }
 
 /* HEADER */
 .top-header {
-  height: 70px;
+  height: 60px;
   background: #fff;
   border-bottom: 1px solid #ddd;
   display: flex;
@@ -19,22 +19,49 @@ body {
   padding: 0 40px;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url('../images/map-bg.png') center/cover no-repeat;
+  filter: blur(6px);
+  transform: scale(1.05);
+  z-index: -2;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.6);
+  z-index: -1;
+}
+
 .logo {
   font-size: 22px;
   font-weight: 700;
 }
 
-nav a {
-  margin-left: 20px;
+.top-nav {
+  margin-left: auto;
+}
+
+.top-nav a {
+  margin-left: 25px;
   text-decoration: none;
   color: #000;
+  font-weight: 500;
+}
+
+.top-nav a:hover {
+  text-decoration: underline;
 }
 
 /* CENTER PAGE */
 .center-page {
   display: flex;
   justify-content: center;
-  gap: 40px;
+  gap: 25px;
   padding: 80px;
 }
 
@@ -109,4 +136,53 @@ input, select, textarea {
     flex-direction: column;
     align-items: center;
   }
+}
+
+
+
+/* ================= SIMPLE ANIMATIONS ================= */
+.fade-up {
+  animation: fadeUp 0.6s ease;
+}
+
+.fade-down {
+  animation: fadeDown 0.6s ease;
+}
+
+.slide-left {
+  animation: slideLeft 0.6s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+
+.primary-btn {
+  width: 100%;
+  padding: 12px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 18px;
+  transition: background 0.2s;
+}
+
+.primary-btn:hover {
+  background: #333;
 }

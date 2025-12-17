@@ -98,4 +98,23 @@ return render_template("index.html, variables=variables_NAMES)
 {% FOR CONDITION IN VALUES %}
 
 
+#flash() messages: temporary msg that are showed when process is happen. only one time
+flash
 
+
+{% with messages = get_flashed_messages() %}
+flash(messages)
+
+
+#Flask WTF : web template form
+built in validtor in flask
+uses classes for easy backend logic
+security from CSRF ATTACK
+
+#company login issue
+#js logic for map
+#css development of all pages
+
+https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/backdrop-filter
+
+https://codepen.io/alphardex/pen/pooQMVp

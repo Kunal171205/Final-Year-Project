@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Sign Up - Industry Explorer</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup-business.css') }}">
+</head>
+<body>
+
+<header class="simple-header">
+    <div class="simple-header-container">
+        <div class="logo">
+            <span class="logo-text">
+                Industry<span class="logo-highlight">Explorer</span>
+            </span>
+        </div>
+    </div>
+</header>
+
+<div class="signup-container-wrapper">
+    <div class="signup-container">
+        <div class="signup-card">
+
+            <h2>Register Your Company</h2>
+            <p class="signup-subtitle">
+                Join Industry Explorer and grow your business
+            </p>
+
+            <form class="signup-form" action="signup" method="POST">
+
+                
+
+                <!-- EMAIL -->
+                <div class="form-group">
+                    <label>Company Email</label>
+                    <input type="email" name="email"
+                           placeholder="official@company.com" required>
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password"
+                           placeholder="Create a password" required>
+                </div>
+
+                <!-- PHONE -->
+                <div class="form-group">
+                    <label>Company Phone Number</label>
+                    <input type="tel" name="phone"
+                           placeholder="10-digit phone number"
+                           pattern="[0-9]{10}" maxlength="10" required>
+                </div>
+
+                <!-- COMPANY NAME -->
+                <div class="form-group">
+                    <label>Company Name</label>
+                    <input type="text" name="company_name"
+                           placeholder="Enter company name" required>
+                </div>
+
+                <!-- INDUSTRY TYPE -->
+                <div class="form-group">
+                    <label>Industry Type</label>
+                    <select name="industry_type" required>
+                        <option value="">Select Industry</option>
+                        <option>Manufacturing</option>
+                        <option>Chemical</option>
+                        <option>IT / Software</option>
+                        <option>Textile</option>
+                        <option>Automobile</option>
+                        <option>Pharmaceutical</option>
+                        <option>Food Processing</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+
+                <!-- ADDRESS -->
+                <div class="form-group">
+                    <label>Company Address</label>
+                    <textarea name="address" rows="3"
+                              placeholder="Enter company address" required></textarea>
+                </div>
+
+                <!-- LOCATION -->
+                <div class="form-group">
+                    <label>City / MIDC Area</label>
+                    <input type="text" name="city"
+                           placeholder="Eg: Pune MIDC, Chakan" required>
+                </div>
+
+                <!-- WEBSITE -->
+                <div class="form-group">
+                    <label>Company Website (Optional)</label>
+                    <input type="url" name="website"
+                           placeholder="https://company.com">
+                </div>
+
+               
+                <button type="submit" class="btn-signup-submit">
+                    Register Company
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>
+                    Already have an account?
+                    <a href="#" class="link-green">Log In</a>
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
