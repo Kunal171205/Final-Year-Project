@@ -6,9 +6,7 @@
     font-family: "Segoe UI", Arial, sans-serif;
 }
 
-body {
-    /* Background handled by body::before with blur */
-}
+
 
 /* ================= HEADER ================= */
 .main-header {
