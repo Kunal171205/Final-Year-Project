@@ -33,37 +33,56 @@
 
 <div class="container">
 
-  <h2>Applications for: Machine Operator</h2>
-  <p class="sub">Chakan MIDC</p>
+  {% if job %}
+    <h2>Applications for: {{ job.job_title }}</h2>
+    <p class="sub">{{ job.job_location }}</p>
+  {% else %}
+    <h2>All Applications</h2>
+    <p class="sub">Applications for all your posted jobs</p>
+  {% endif %}
 
-  <!-- APPLICATION CARD -->
-  <div class="app-card">
-    <div class="info">
-      <h4>Ramesh Patil</h4>
-      <p>Skill: Machine Operator</p>
-      <p>Experience: 2 Years</p>
-      <p>Applied: Today</p>
-    </div>
-
-    <div class="actions">
-      <a href="tel:+919876543210" class="call">Call</a>
-      <a href="https://wa.me/919876543210" class="whatsapp">WhatsApp</a>
-    </div>
+  <!-- FILTER BY JOB -->
+  {% if all_jobs %}
+  <div style="margin-bottom: 20px;">
+    <label>Filter by Job:</label>
+    <select onchange="window.location.href=this.value ? '/application?job_id=' + this.value : '/application'">
+      <option value="">All Jobs</option>
+      {% for j in all_jobs %}
+      <option value="{{ j.job_id }}" {% if job and job.job_id == j.job_id %}selected{% endif %}>
+        {{ j.job_title }} - {{ j.job_location }}
+      </option>
+      {% endfor %}
+    </select>
   </div>
+  {% endif %}
 
-  <div class="app-card">
-    <div class="info">
-      <h4>Suresh Jadhav</h4>
-      <p>Skill: Factory Worker</p>
-      <p>Experience: Fresher</p>
-      <p>Applied: Yesterday</p>
-    </div>
+  <!-- APPLICATION CARDS -->
+  {% if applications %}
+    {% for app in applications %}
+    <div class="app-card">
+      <div class="info">
+        <h4>{{ app.applicant_name }}</h4>
+        <p><strong>Job:</strong> {{ app.job.job_title if app.job else 'N/A' }}</p>
+        <p><strong>Skill:</strong> {{ app.applicant_skill }}</p>
+        <p><strong>Experience:</strong> {{ app.applicant_experience }}</p>
+        <p><strong>Age:</strong> {{ app.applicant_age }} | <strong>Gender:</strong> {{ app.applicant_gender }}</p>
+        <p><strong>Expected Salary:</strong> {{ app.applicant_expected_salary }}</p>
+        <p><strong>Email:</strong> {{ app.applicant_email }}</p>
+        <p><strong>Applied:</strong> {% if app.application_date %}{{ app.application_date.strftime('%Y-%m-%d %H:%M') }}{% else %}N/A{% endif %}</p>
+        <p><strong>Status:</strong> <span style="color: {% if app.applicant_status == 'selected' %}green{% elif app.applicant_status == 'rejected' %}red{% else %}orange{% endif %};">{{ app.applicant_status|title if app.applicant_status else 'N/A' }}</span></p>
+      </div>
 
-    <div class="actions">
-      <a href="tel:+919812345678" class="call">Call</a>
-      <a href="https://wa.me/919812345678" class="whatsapp">WhatsApp</a>
+      <div class="actions">
+        <a href="tel:{{ app.applicant_phone }}" class="call" target="_blank">Call</a>
+        <a href="https://wa.me/{{ app.applicant_phone|replace('+', '')|replace(' ', '')|replace('-', '') }}" class="whatsapp" target="_blank">WhatsApp</a>
+      </div>
     </div>
-  </div>
+    {% endfor %}
+  {% else %}
+    <div class="app-card">
+      <p>No applications found.</p>
+    </div>
+  {% endif %}
 
 </div>
 

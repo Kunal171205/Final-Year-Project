@@ -38,50 +38,52 @@
     <h2>Post a Job</h2>
     <p class="subtitle">Hire workers from nearby MIDC areas</p>
 
-    <form>
+    <form method="POST" action="{{ url_for('jobpost') }}">
 
       <label>Job Title</label>
-      <input type="text" placeholder="Machine Operator" required>
+      <input type="text" name="job_title" placeholder="Machine Operator" required>
 
       <label>Job Category</label>
-      <select required>
-        <option>Factory Worker</option>
-        <option>Machine Operator</option>
-        <option>Welder</option>
-        <option>Electrician</option>
-        <option>Helper</option>
+      <select name="job_category" required>
+        <option value="">Select Category</option>
+        <option value="Factory Worker">Factory Worker</option>
+        <option value="Machine Operator">Machine Operator</option>
+        <option value="Welder">Welder</option>
+        <option value="Electrician">Electrician</option>
+        <option value="Helper">Helper</option>
       </select>
 
       <label>Location (MIDC)</label>
-      <select required>
-        <option>Chakan MIDC</option>
-        <option>Pimpri MIDC</option>
-        <option>Talegaon MIDC</option>
-        <option>Bhosari MIDC</option>
+      <select name="job_location" required>
+        <option value="">Select Location</option>
+        <option value="Chakan MIDC">Chakan MIDC</option>
+        <option value="Pimpri MIDC">Pimpri MIDC</option>
+        <option value="Talegaon MIDC">Talegaon MIDC</option>
+        <option value="Bhosari MIDC">Bhosari MIDC</option>
       </select>
 
       <label>Experience Required</label>
-      <select>
-        <option>Fresher</option>
-        <option>1–2 Years</option>
-        <option>2+ Years</option>
+      <select name="job_experience">
+        <option value="Fresher">Fresher</option>
+        <option value="1–2 Years">1–2 Years</option>
+        <option value="2+ Years">2+ Years</option>
       </select>
 
       <label>Shift Type</label>
-      <select>
-        <option>Day Shift</option>
-        <option>Night Shift</option>
-        <option>Rotational</option>
+      <select name="job_shift">
+        <option value="Day Shift">Day Shift</option>
+        <option value="Night Shift">Night Shift</option>
+        <option value="Rotational">Rotational</option>
       </select>
 
       <label>Salary Range</label>
-      <input type="text" placeholder="₹12,000 – ₹18,000">
+      <input type="text" name="job_salary" placeholder="₹12,000 – ₹18,000" required>
 
       <label>Contact Number</label>
-      <input type="text" placeholder="+91 XXXXXXXXXX" required>
+      <input type="text" name="job_contact" placeholder="+91 XXXXXXXXXX" required>
 
       <label>Job Description</label>
-      <textarea rows="4" placeholder="Work details, overtime, benefits..." required></textarea>
+      <textarea name="job_description" rows="4" placeholder="Work details, overtime, benefits..." required></textarea>
 
       <button type="submit">Post Job</button>
 

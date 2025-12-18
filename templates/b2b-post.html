@@ -34,35 +34,42 @@
   <div class="form-card">
     <h2>Post Sell Requirement</h2>
     
-    <form>
+    <form method="POST" action="{{ url_for('b2bpost') }}">
       <label>Product / Service</label>
-      <input type="text" placeholder="Steel rods / Packaging service" required>
+      <input type="text" name="sell_name" placeholder="Steel rods / Packaging service" required>
 
       <label>Category</label>
-      <select>
-        <option>Raw Material</option>
-        <option>Machinery</option>
-        <option>Electrical</option>
-        <option>Services</option>
+      <select name="sell_category">
+        <option value="">Select Category</option>
+        <option value="Raw Material">Raw Material</option>
+        <option value="Machinery">Machinery</option>
+        <option value="Electrical">Electrical</option>
+        <option value="Services">Services</option>
+        <option value="Other">Other</option>
       </select>
 
       <label>Quantity / Capacity</label>
-      <input type="text" placeholder="500 kg / Monthly service">
+      <input type="text" name="sell_quantity" placeholder="500 kg / Monthly service" required>
 
       <label>Location (MIDC)</label>
-      <select>
-        <option>Chakan MIDC</option>
-        <option>Pimpri MIDC</option>
-        <option>Talegaon MIDC</option>
+      <select name="sell_location">
+        <option value="">Select Location</option>
+        <option value="Chakan MIDC">Chakan MIDC</option>
+        <option value="Pimpri MIDC">Pimpri MIDC</option>
+        <option value="Talegaon MIDC">Talegaon MIDC</option>
+        <option value="Bhosari MIDC">Bhosari MIDC</option>
       </select>
 
-      <label>Expected Price</label>
-      <input type="text" placeholder="₹ / Negotiable">
+      <label>Expected Price (₹)</label>
+      <input type="text" name="sell_price" placeholder="45000 or 45/kg" required>
+
+      <label>Image URL (Optional)</label>
+      <input type="url" name="sell_image" placeholder="https://example.com/image.jpg">
 
       <label>Description</label>
-      <textarea rows="4"></textarea>
+      <textarea name="sell_description" rows="4" placeholder="Detailed description of the product/service..." required></textarea>
 
-      <button class ="primary-btn" type="submit">Post Trade</button>
+      <button class="primary-btn" type="submit">Post Trade</button>
     </form>
 
   </div>

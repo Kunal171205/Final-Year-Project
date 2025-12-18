@@ -29,30 +29,50 @@
   </nav>
 </header>
 
-<section class="list-page">
+<section class="form-page">
 
-  <div class="trade-card">
-    <h3>SELL • Steel Rods</h3>
-    <p>Quantity: 500 kg</p>
-    <p>Location: Chakan MIDC</p>
-    <p>Price: ₹45/kg</p>
+  <div class="form-card">
+    <h2>Post Buy Requirement</h2>
+    <p class="subtitle">Post what materials or services you need to buy</p>
+    
+    <form method="POST" action="{{ url_for('hostseller') }}">
+      <label>Product / Service Needed</label>
+      <input type="text" name="buy_name" placeholder="Steel rods / Packaging service" required>
 
-    <div class="actions">
-      <a href="tel:+919999999999" class="call">Call</a>
-      <a href="#" class="whatsapp">WhatsApp</a>
-    </div>
-  </div>
+      <label>Category</label>
+      <select name="buy_category">
+        <option value="">Select Category</option>
+        <option value="Raw Material">Raw Material</option>
+        <option value="Machinery">Machinery</option>
+        <option value="Electrical">Electrical</option>
+        <option value="Services">Services</option>
+        <option value="Other">Other</option>
+      </select>
 
-  <div class="trade-card">
-    <h3>BUY • Packaging Service</h3>
-    <p>Monthly Requirement</p>
-    <p>Location: Pimpri MIDC</p>
-    <p>Budget: Negotiable</p>
+      <label>Quantity / Capacity Needed</label>
+      <input type="text" name="buy_quantity" placeholder="500 kg / Monthly service" required>
 
-    <div class="actions">
-      <a href="tel:+919888888888" class="call">Call</a>
-      <a href="#" class="whatsapp">WhatsApp</a>
-    </div>
+      <label>Location (MIDC)</label>
+      <select name="buy_location">
+        <option value="">Select Location</option>
+        <option value="Chakan MIDC">Chakan MIDC</option>
+        <option value="Pimpri MIDC">Pimpri MIDC</option>
+        <option value="Talegaon MIDC">Talegaon MIDC</option>
+        <option value="Bhosari MIDC">Bhosari MIDC</option>
+      </select>
+
+      <label>Budget (Optional)</label>
+      <input type="text" name="buy_budget" placeholder="45000 or Negotiable">
+
+      <label>Image URL (Optional)</label>
+      <input type="url" name="buy_image" placeholder="https://example.com/image.jpg">
+
+      <label>Description</label>
+      <textarea name="buy_description" rows="4" placeholder="Detailed description of what you need..." required></textarea>
+
+      <button class="primary-btn" type="submit">Post Buy Requirement</button>
+    </form>
+
   </div>
 
 </section>

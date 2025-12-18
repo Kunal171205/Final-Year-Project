@@ -39,17 +39,14 @@
     <div class="profile-header">
       <div class="avatar">👷</div>
       <div>
-        <h2>Ramesh Patil</h2>
-        <p>Machine Operator</p>
+        <h2>{{ username }}</h2>
+        <p>Worker Profile</p>
       </div>
     </div>
 
     <div class="profile-info">
-      <div><strong>Phone:</strong> +91 9876543210</div>
-      <div><strong>Age:</strong> 26</div>
-      <div><strong>Gender:</strong> Male</div>
-      <div><strong>Experience:</strong> 2 Years</div>
-      <div><strong>Expected Salary:</strong> ₹18,000 / month</div>
+      <div><strong>Username:</strong> {{ username }}</div>
+      <div><strong>Total Applications:</strong> {{ applications|length }}</div>
     </div>
   </div>
 
@@ -57,29 +54,29 @@
   <div class="jobs-card">
     <h3>Applied Jobs</h3>
 
-    <div class="job-row">
-      <div>
-        <h4>Machine Operator</h4>
-        <p>ABC Industries – Chakan MIDC</p>
+    {% if applications %}
+      {% for item in applications %}
+      <div class="job-row">
+        <div>
+          <h4>{{ item.job.job_title if item.job else 'Job Not Found' }}</h4>
+          <p>{{ item.job.job_category if item.job else 'N/A' }} – {{ item.job.job_location if item.job else 'N/A' }}</p>
+          <p style="font-size: 0.9em; color: #666;">
+            Applied: {{ item.application.application_date.strftime('%Y-%m-%d') if item.application.application_date else 'N/A' }}
+          </p>
+        </div>
+        <span class="status {{ item.application.applicant_status }}">
+          {{ item.application.applicant_status|title }}
+        </span>
       </div>
-      <span class="status pending">Pending</span>
-    </div>
-
-    <div class="job-row">
-      <div>
-        <h4>Factory Helper</h4>
-        <p>XYZ Manufacturing – Pimpri MIDC</p>
+      {% endfor %}
+    {% else %}
+      <div class="job-row">
+        <div>
+          <p>You haven't applied for any jobs yet.</p>
+          <a href="{{ url_for('jobportal') }}">Browse Jobs</a>
+        </div>
       </div>
-      <span class="status selected">Selected</span>
-    </div>
-
-    <div class="job-row">
-      <div>
-        <h4>Welder</h4>
-        <p>SteelWorks Pvt Ltd – Talegaon MIDC</p>
-      </div>
-      <span class="status rejected">Rejected</span>
-    </div>
+    {% endif %}
 
   </div>
 

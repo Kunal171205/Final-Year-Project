@@ -31,30 +31,69 @@
 
 <section class="list-page">
 
-  <!-- MATERIAL CARD -->
-  <div class="trade-card">
-    <h3>Steel Rods</h3>
-    <p>Quantity: 500 kg</p>
-    <p>Price: ₹45/kg</p>
-    <p>Location: Chakan MIDC</p>
+  <h2 style="text-align: center; margin-bottom: 20px;">B2B Marketplace</h2>
 
-    <div class="actions">
-      <a href="tel:+919999999999" class="call">Call Seller</a>
-      <a href="https://wa.me/919999999999" class="whatsapp">WhatsApp</a>
+  <!-- SELL ITEMS SECTION -->
+  <h3 style="margin: 30px 0 15px 0; color: #333;">📦 Items for Sale</h3>
+  {% if sell_items %}
+    {% for item in sell_items %}
+    <div class="trade-card" style="border-left: 4px solid #2e7d32;">
+      <h3>SELL • {{ item.sell_name }}</h3>
+      {% if item.sell_category %}
+      <p><strong>Category:</strong> {{ item.sell_category }}</p>
+      {% endif %}
+      <p><strong>Quantity:</strong> {{ item.sell_quantity }}</p>
+      <p><strong>Price:</strong> ₹{{ "%.2f"|format(item.sell_price) }}</p>
+      {% if item.sell_location %}
+      <p><strong>Location:</strong> {{ item.sell_location }}</p>
+      {% endif %}
+      <p><strong>Description:</strong> {{ item.sell_description[:100] }}{% if item.sell_description|length > 100 %}...{% endif %}</p>
+      <p style="font-size: 0.9em; color: #666;">
+        <strong>Posted:</strong> {{ item.sell_date.strftime('%Y-%m-%d') if item.sell_date else 'N/A' }}
+      </p>
+
+      <div class="actions">
+        <a href="mailto:{{ item.posted_by }}" class="call">Contact Seller</a>
+        <p style="font-size: 0.85em; color: #666; margin-top: 5px;">Seller: {{ item.posted_by }}</p>
+      </div>
     </div>
-  </div>
-
-  <div class="trade-card">
-    <h3>Plastic Scrap</h3>
-    <p>Quantity: 1 Ton</p>
-    <p>Price: Negotiable</p>
-    <p>Location: Pimpri MIDC</p>
-
-    <div class="actions">
-      <a href="tel:+918888888888" class="call">Call Seller</a>
-      <a href="https://wa.me/918888888888" class="whatsapp">WhatsApp</a>
+    {% endfor %}
+  {% else %}
+    <div class="trade-card">
+      <p>No items for sale at the moment. Check back later!</p>
     </div>
-  </div>
+  {% endif %}
+
+  <!-- BUY REQUIREMENTS SECTION -->
+  <h3 style="margin: 30px 0 15px 0; color: #333;">🛒 Buy Requirements</h3>
+  {% if buy_items %}
+    {% for item in buy_items %}
+    <div class="trade-card" style="border-left: 4px solid #1976d2;">
+      <h3>BUY • {{ item.buy_name }}</h3>
+      {% if item.buy_category %}
+      <p><strong>Category:</strong> {{ item.buy_category }}</p>
+      {% endif %}
+      <p><strong>Quantity Needed:</strong> {{ item.buy_quantity }}</p>
+      <p><strong>Budget:</strong> {% if item.buy_budget %}₹{{ "%.2f"|format(item.buy_budget) }}{% else %}Negotiable{% endif %}</p>
+      {% if item.buy_location %}
+      <p><strong>Location:</strong> {{ item.buy_location }}</p>
+      {% endif %}
+      <p><strong>Description:</strong> {{ item.buy_description[:100] }}{% if item.buy_description|length > 100 %}...{% endif %}</p>
+      <p style="font-size: 0.9em; color: #666;">
+        <strong>Posted:</strong> {{ item.buy_date.strftime('%Y-%m-%d') if item.buy_date else 'N/A' }}
+      </p>
+
+      <div class="actions">
+        <a href="mailto:{{ item.posted_by }}" class="call">Contact Buyer</a>
+        <p style="font-size: 0.85em; color: #666; margin-top: 5px;">Buyer: {{ item.posted_by }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="trade-card">
+      <p>No buy requirements posted at the moment. Check back later!</p>
+    </div>
+  {% endif %}
 
 </section>
 

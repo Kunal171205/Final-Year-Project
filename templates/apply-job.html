@@ -36,53 +36,61 @@
 <div class="page-container">
 
   <!-- JOB DETAILS -->
+  {% if job %}
   <div class="job-summary">
-    <h3>Machine Operator</h3>
-    <p>ABC Industries – Chakan MIDC</p>
-    <span>Day Shift • ₹15,000 – ₹18,000</span>
+    <h3>{{ job.job_title }}</h3>
+    <p>{{ job.job_category }} – {{ job.job_location }}</p>
+    <span>{{ job.job_shift }} • {{ job.job_salary }}</span>
+    <p class="job-desc">{{ job.job_description }}</p>
   </div>
+  {% endif %}
 
   <!-- APPLY FORM -->
   <div class="apply-card">
     <h4>Apply for this Job</h4>
 
-    <form>
+    <form method="POST" action="{{ url_for('applyjob') }}">
+      <input type="hidden" name="job_id" value="{{ job.job_id if job else '' }}">
 
       <label>Full Name</label>
-      <input type="text" placeholder="Enter your name" required>
+      <input type="text" name="applicant_name" placeholder="Enter your name" required>
+
+      <label>Email</label>
+      <input type="email" name="applicant_email" placeholder="your.email@example.com" required>
 
       <label>Phone Number</label>
-      <input type="tel" placeholder="+91 XXXXXXXXXX" required>
+      <input type="tel" name="applicant_phone" placeholder="+91 XXXXXXXXXX" required>
 
       <label>Age</label>
-      <input type="number" min="18" max="60" placeholder="Enter your age" required>
+      <input type="number" name="applicant_age" min="18" max="60" placeholder="Enter your age" required>
 
       <label>Gender</label>
-      <select required>
+      <select name="applicant_gender" required>
         <option value="">Select gender</option>
-        <option>Male</option>
-        <option>Female</option>
-        <option>Other</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
       </select>
 
       <label>Skill / Job Type</label>
-      <select required>
-        <option>Factory Worker</option>
-        <option>Machine Operator</option>
-        <option>Welder</option>
-        <option>Electrician</option>
-        <option>Helper</option>
+      <select name="applicant_skill" required>
+        <option value="">Select skill</option>
+        <option value="Factory Worker">Factory Worker</option>
+        <option value="Machine Operator">Machine Operator</option>
+        <option value="Welder">Welder</option>
+        <option value="Electrician">Electrician</option>
+        <option value="Helper">Helper</option>
       </select>
 
       <label>Experience</label>
-      <select>
-        <option>Fresher</option>
-        <option>1–2 Years</option>
-        <option>2+ Years</option>
+      <select name="applicant_experience">
+        <option value="Fresher">Fresher</option>
+        <option value="1–2 Years">1–2 Years</option>
+        <option value="2+ Years">2+ Years</option>
       </select>
 
       <label>Expected Salary (per month)</label>
-      <input type="text" placeholder="₹12,000 – ₹20,000" required>
+      <input type="text" name="applicant_expected_salary" placeholder="₹12,000 – ₹20,000" required>
 
       <button type="submit">Apply Job</button>
 

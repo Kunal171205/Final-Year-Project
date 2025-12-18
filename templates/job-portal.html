@@ -25,7 +25,7 @@
         {% else %}
         <a href="{{ url_for('home') }}">Home</a>
         <a href="{{ url_for('jobportal') }}">Job Portal</a>
-        <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
+           <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
             <a href="{{ url_for('logintype') }}">Login</a>
         {% endif %}
   </nav>
@@ -74,49 +74,32 @@
       <input type="text" placeholder="Search job title or company...">
     </div>
 
-    <!-- JOB CARD -->
-    <div class="job-card">
-      <!-- i have to write jinja code for this job card -->
-      <h4>Machine Operator</h4>
-      <p class="company">ABC Industries – Chakan MIDC</p>
+    <!-- JOB CARDS - Dynamic from Database -->
+    {% if jobs %}
+      {% for job in jobs %}
+      <div class="job-card">
+        <h4>{{ job.job_title }}</h4>
+        <p class="company">{{ job.job_category }} – {{ job.job_location }}</p>
 
-      <div class="job-info">
-        <span>💼 1–2 Years</span>
-        <span>⏰ Day Shift</span>
-        <span>💰 ₹15,000 – ₹18,000</span>
+        <div class="job-info">
+          <span>💼 {{ job.job_experience }}</span>
+          <span>⏰ {{ job.job_shift }}</span>
+          <span>💰 {{ job.job_salary }}</span>
+        </div>
+
+        <p class="job-desc">{{ job.job_description[:100] }}{% if job.job_description|length > 100 %}...{% endif %}</p>
+        <p class="contact-info">📞 Contact: {{ job.job_contact }}</p>
+
+        <a href="{{ url_for('applyjob') }}?job_id={{ job.job_id }}">
+          <button class="apply-btn">Apply</button>
+        </a>
       </div>
-
-      <a href="{{ url_for('applyjob') }}">
-        <button class="apply-btn">Apply</button>
-      </a>
-
-    </div>
-
-    <div class="job-card">
-      <h4>Factory Helper</h4>
-      <p class="company">XYZ Manufacturing – Pimpri MIDC</p>
-
-      <div class="job-info">
-        <span>💼 Fresher</span>
-        <span>⏰ Rotational</span>
-        <span>💰 ₹12,000 – ₹14,000</span>
+      {% endfor %}
+    {% else %}
+      <div class="job-card">
+        <p>No jobs available at the moment. Check back later!</p>
       </div>
-
-      <button>Apply</button>
-    </div>
-
-    <div class="job-card">
-      <h4>Welder</h4>
-      <p class="company">SteelWorks Pvt Ltd – Talegaon MIDC</p>
-
-      <div class="job-info">
-        <span>💼 2+ Years</span>
-        <span>⏰ Day Shift</span>
-        <span>💰 ₹18,000 – ₹22,000</span>
-      </div>
-
-      <button>Apply</button>
-    </div>
+    {% endif %}
 
   </main>
 
