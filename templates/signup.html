@@ -22,7 +22,7 @@
                 <h2>Create Your Account</h2>
                 <p class="signup-subtitle">Join Industry Explorer and start exploring opportunities</p>
 
-                <form class="signup-form" action="#" method="POST">
+                <form class="signup-form" action="{{ url_for('signup') }}" method="POST">
                     <div class="form-group">
                         <label for="username">Username</label>
                         <input type="text" id="username" name="username" placeholder="Enter your username" required>
@@ -75,7 +75,7 @@
                 
 
                 <div class="auth-footer">
-                    <p>Already have an account? <a href="{{ url_for('Login') }}" class="link-green">Log In</a></p>
+                    <p>Already have an account? <a href="{{ url_for('login', user_type='user') }}" class="link-green">Log In</a></p>
                 </div>
             </div>
         </div>

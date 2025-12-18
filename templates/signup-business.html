@@ -28,7 +28,7 @@
                 Join Industry Explorer and grow your business
             </p>
 
-            <form class="signup-form" action="signup" method="POST">
+            <form class="signup-form" action="{{ url_for('businesssignup') }}" method="POST">
 
                 
 
@@ -107,7 +107,7 @@
             <div class="auth-footer">
                 <p>
                     Already have an account?
-                    <a href="#" class="link-green">Log In</a>
+                    <a href="{{ url_for('login', user_type='business') }}" class="link-green">Log In</a>
                 </p>
             </div>
 

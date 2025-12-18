@@ -15,8 +15,8 @@
             </div>
             
             <div class="header-actions">
-                <a href="#" class="action-link">Log In</a>
-                <a href="#" class="btn-signup">Create a free account</a>
+                <a href="{{ url_for('logintype') }}" class="action-link">Log In</a>
+            
             </div>
         </div>
     </header>
@@ -37,11 +37,12 @@
                 and access trade finance tools to grow your regional economy.
             </p>
             
-            <a href="{{ url_for('Login',user_type='business') }}" class="btn-login">Login</a> 
+            <!-- Use the correct Flask endpoint name "login" and fix the extra quote -->
+            <a href="{{ url_for('login', user_type='business') }}" class="btn-login">Login</a> 
 
             <div class="auth-footer">
                 <p>Don't have an account?</p>
-                <a href="{{ url_for('businesssignup') }}"" class="link-green">Register Company</a> 
+                <a href="{{ url_for('businesssignup') }}" class="link-green">Register Company</a> 
             </div>
         </div>
 
@@ -55,7 +56,8 @@
                 connect with employers, and build your career locally.
             </p>
             
-            <a href="{{ url_for('Login',user_type='seeker') }}" class="btn-login">Login</a> 
+            <!-- Use the same role key "user" that app.py/dashboard expects -->
+            <a href="{{ url_for('login', user_type='user') }}" class="btn-login">Login</a> 
 
             <div class="auth-footer">
                 <p>Don't have an account?</p>

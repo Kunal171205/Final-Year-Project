@@ -20,7 +20,8 @@
     <p class="subtitle">Login and start exploring opportunities</p>
 
     <!-- LOGIN FORM -->
-    <form method="POST" action="{{ url_for('Login') }}"> 
+    <!-- Use the correct Flask endpoint name "login" (lowercase) -->
+    <form method="POST" action="{{ url_for('login') }}"> 
       <!-- preserve user type across POST -->
       <input type="hidden" name="user_type" value="{{ user_type }}">
       <label>Username</label>
