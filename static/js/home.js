@@ -6,6 +6,9 @@ let activeInfoWindow = null;
 
 let userLocation = null;      // ONLY set when user clicks My Location
 let locationConfirmed = false;
+let autoReloadEnabled = true;
+const placeDetailsCache = {};
+
 
 // ---------------- MAP STYLE ----------------
 const pureMapStyle = [
@@ -76,7 +79,7 @@ function getIndustryConfigByZoom(zoom) {
 // INIT MAP (NO GPS HERE)
 // ================================
 function initMap() {
-  const fallbackCenter = { lat: 18.5204, lng: 73.8567 }; // Pune / MIDC fallback
+  const fallbackCenter = { lat: 18.5204, lng: 73.8567 }; // Pune fallback
 
   map = new google.maps.Map(document.getElementById("map"), {
     center: fallbackCenter,
@@ -87,9 +90,21 @@ function initMap() {
   initAutocomplete();
   initLocationButton();
 
-  // Load industries based on map view (NOT GPS)
+  // Initial load
   google.maps.event.addListenerOnce(map, "idle", () => {
     searchIndustriesNearLocation(map.getCenter());
+  });
+
+  // 🔥 ZOOM-BASED RELOAD (RESTORED)
+  map.addListener("zoom_changed", () => {
+    if (!autoReloadEnabled) return;
+
+    searchIndustriesNearLocation(map.getCenter());
+  });
+
+  // Allow auto reload again after drag
+  map.addListener("dragend", () => {
+    autoReloadEnabled = true;
   });
 
   map.addListener("click", () => {
@@ -147,6 +162,16 @@ function getUserLocation() {
 // ================================
 // NEARBY INDUSTRY SEARCH
 // ================================
+function getPlacePhoto(place) {
+  if (place.photos && place.photos.length > 0) {
+    return place.photos[0].getUrl({
+      maxWidth: 300,
+      maxHeight: 200
+    });
+  }
+  return "https://via.placeholder.com/300x200?text=No+Image";
+}
+
 function searchIndustriesNearLocation(location) {
   if (!google.maps.places || !location) return;
 
@@ -168,7 +193,12 @@ function searchIndustriesNearLocation(location) {
           if (seenPlaces.has(place.place_id)) return;
 
           seenPlaces.add(place.place_id);
-          addMarker(place.geometry.location, place.name, place.vicinity);
+          addMarker(
+            place.geometry.location,
+            place.name,
+            place.vicinity,
+            place   // 🔥 pass full place object
+          );
           count++;
         });
       }
@@ -269,8 +299,10 @@ function runTextSearch(query, location) {
         addMarker(
           place.geometry.location,
           place.name,
-          place.formatted_address
+          place.vicinity,
+          place   // 🔥 pass full place object
         );
+        
       });
     }
   );
@@ -315,31 +347,146 @@ function initLocationButton() {
 // ================================
 // MARKERS
 // ================================
-function addMarker(position, title, description = "") {
-  const marker = new google.maps.Marker({ map, position, title });
+function fetchPlaceWebsite(placeId, callback) {
+  // Use cache if already fetched
+  if (placeDetailsCache[placeId]) {
+    callback(placeDetailsCache[placeId]);
+    return;
+  }
 
-  const infoWindow = new google.maps.InfoWindow({
-    content: `
-      <div style="font-family:Arial;min-width:220px">
-        <div style="font-weight:600">${title}</div>
-        <div style="font-size:13px;color:#555">${description || ""}</div>
-        <a target="_blank"
-           href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(title)}"
-           style="color:#1a73e8;font-size:13px;text-decoration:none">
-          View on Google Maps
-        </a>
-      </div>
-    `
+  const service = new google.maps.places.PlacesService(map);
+
+  service.getDetails(
+    {
+      placeId: placeId,
+      fields: ["website"]
+    },
+    (place, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK && place?.website) {
+        placeDetailsCache[placeId] = place.website;
+        callback(place.website);
+      } else {
+        placeDetailsCache[placeId] = null;
+        callback(null);
+      }
+    }
+  );
+}
+
+
+function addMarker(position, title, description = "", placeData = null) {
+  const marker = new google.maps.Marker({
+    map,
+    position,
+    title,
+  
   });
 
-  marker.addListener("click", () => {
-    if (activeInfoWindow) activeInfoWindow.close();
+  const photoUrl =
+    placeData?.photos?.length
+      ? placeData.photos[0].getUrl({ maxWidth: 300, maxHeight: 200 })
+      : null;
+
+  let isMarkerHovered = false;
+  let isInfoHovered = false;
+  let closeTimer = null;
+  let websiteLoaded = false;
+
+  const infoWindow = new google.maps.InfoWindow({
+    content: `<div id="iw-content">Loading...</div>`,
+    disableAutoPan: true
+  });
+
+  function buildContent(website = null) {
+    return `
+      <div id="iw-content" style="font-family:Arial;max-width:260px">
+        ${photoUrl ? `
+          <img src="${photoUrl}"
+               style="width:100%;height:140px;object-fit:cover;
+                      border-radius:6px;margin-bottom:6px">
+        ` : ""}
+
+        <div style="font-size:14px;font-weight:600">${title}</div>
+
+        <div style="font-size:13px;color:#555;margin-top:4px">
+          ${description || "Industrial location"}
+        </div>
+
+        ${placeData?.rating ? `
+          <div style="font-size:13px;color:#fbbc04;margin-top:4px">
+            ⭐ ${placeData.rating}
+            (${placeData.user_ratings_total || 0})
+          </div>
+        ` : ""}
+
+        ${website ? `
+          <a href="${website}" target="_blank"
+             style="display:block;margin-top:6px;
+                    color:#1a73e8;font-size:13px;text-decoration:none">
+            🌐 Company Website
+          </a>
+        ` : ""}
+      </div>
+    `;
+  }
+
+  function openInfo() {
+    if (activeInfoWindow && activeInfoWindow !== infoWindow) {
+      activeInfoWindow.close();
+    }
+
+    infoWindow.setContent(buildContent());
     infoWindow.open(map, marker);
     activeInfoWindow = infoWindow;
+
+    // 🔥 Load website ONLY ONCE
+    if (!websiteLoaded && placeData?.place_id) {
+      websiteLoaded = true;
+      fetchPlaceWebsite(placeData.place_id, website => {
+        infoWindow.setContent(buildContent(website));
+      });
+    }
+  }
+
+  function scheduleClose() {
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(() => {
+      if (!isMarkerHovered && !isInfoHovered) {
+        infoWindow.close();
+        if (activeInfoWindow === infoWindow) activeInfoWindow = null;
+      }
+    }, 150);
+  }
+
+  // Marker hover
+  marker.addListener("mouseover", () => {
+    isMarkerHovered = true;
+    openInfo();
+  });
+
+  marker.addListener("mouseout", () => {
+    isMarkerHovered = false;
+    scheduleClose();
+  });
+
+  // Info window hover
+  google.maps.event.addListener(infoWindow, "domready", () => {
+    const iw = document.getElementById("iw-content");
+    if (!iw) return;
+
+    iw.addEventListener("mouseenter", () => {
+      isInfoHovered = true;
+    });
+
+    iw.addEventListener("mouseleave", () => {
+      isInfoHovered = false;
+      scheduleClose();
+    });
   });
 
   markers.push(marker);
 }
+
 
 function clearMarkers() {
   markers.forEach(m => m.setMap(null));
@@ -353,3 +500,36 @@ window.gm_authFailure = function () {
   document.getElementById("map").innerHTML =
     "<h3 style='color:red'>Google Maps API key error</h3>";
 };
+function resolveUserLocation(callback) {
+  if (userLocation) {
+    callback && callback(userLocation);
+    return;
+  }
+
+  if (!navigator.geolocation) {
+    callback && callback(null);
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userLocation = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude
+      };
+
+      // 🔥 GOOGLE-LIKE: re-center map once GPS is known
+      map.setCenter(userLocation);
+
+      callback && callback(userLocation);
+    },
+    () => {
+      callback && callback(null);
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 15000
+    }
+  );
+}
