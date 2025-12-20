@@ -1,386 +1,355 @@
-// Map.js - Real Map Functionalities
-// This file contains all map-related functionality
-
 let map;
 let markers = [];
-let infoWindow;
 let autocomplete;
 let currentLocationMarker = null;
-let geocoder;
-let directionsService;
-let directionsRenderer;
+let activeInfoWindow = null;
 
-// Initialize the map when the page loads
+let userLocation = null;      // ONLY set when user clicks My Location
+let locationConfirmed = false;
+
+// ---------------- MAP STYLE ----------------
+const pureMapStyle = [
+  /* Hide all POIs (we add our own industry markers) */
+  {
+    featureType: "poi",
+    elementType: "all",
+    stylers: [{ visibility: "off" }]
+  },
+
+  /* Show city, state, area names */
+  {
+    featureType: "administrative",
+    elementType: "labels.text",
+    stylers: [{ visibility: "on" }]
+  },
+
+  /* Show road names */
+  {
+    featureType: "road",
+    elementType: "labels.text",
+    stylers: [{ visibility: "on" }]
+  },
+
+  /* Keep road geometry visible */
+  {
+    featureType: "road",
+    elementType: "geometry",
+    stylers: [{ visibility: "on" }]
+  },
+
+  /* Keep land */
+  {
+    featureType: "landscape",
+    elementType: "geometry",
+    stylers: [{ visibility: "on" }]
+  },
+
+  /* Keep water */
+  {
+    featureType: "water",
+    elementType: "geometry",
+    stylers: [{ visibility: "on" }]
+  }
+];
+
+
+// ---------------- INDUSTRY KEYWORDS ----------------
+const INDUSTRY_KEYWORDS = [
+  "industrial estate",
+  "manufacturing",
+  "industry",
+  "manufacturer",
+  "warehouse"
+];
+
+const seenPlaces = new Set();
+
+// ---------------- ZOOM CONFIG ----------------
+function getIndustryConfigByZoom(zoom) {
+  if (zoom <= 11) return { radius: 20000, limit: 10 };
+  if (zoom <= 13) return { radius: 12000, limit: 20 };
+  if (zoom <= 15) return { radius: 6000, limit: 40 };
+  return { radius: 3000, limit: 80 };
+}
+
+// ================================
+// INIT MAP (NO GPS HERE)
+// ================================
 function initMap() {
-    console.log("initMap called");
-    try {
-        // Check if Google Maps API is loaded
-        if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-            console.error("Google Maps API not loaded!");
-            document.getElementById("map").innerHTML = '<div style="padding: 20px; text-align: center; color: red;">Google Maps API failed to load. Please check your API key.</div>';
-            return;
-        }
+  const fallbackCenter = { lat: 18.5204, lng: 73.8567 }; // Pune / MIDC fallback
 
-        // Default center (Pune, India)
-        const center = { lat: 18.5204, lng: 73.8567 };
-        const mapElement = document.getElementById("map");
-        
-        if (!mapElement) {
-            console.error("Map element not found!");
-            return;
-        }
+  map = new google.maps.Map(document.getElementById("map"), {
+    center: fallbackCenter,
+    zoom: 13,
+    styles: pureMapStyle
+  });
 
-        console.log("Creating map...");
-        
-        // Create map instance
-        map = new google.maps.Map(mapElement, {
-            center: center,
-            zoom: 13,
-            mapTypeId: google.maps.MapTypeId.ROADMAP,
-            mapTypeControl: true,
-            mapTypeControlOptions: {
-                style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-                position: google.maps.ControlPosition.TOP_RIGHT,
-                mapTypeIds: [
-                    google.maps.MapTypeId.ROADMAP,
-                    google.maps.MapTypeId.SATELLITE,
-                    google.maps.MapTypeId.HYBRID,
-                    google.maps.MapTypeId.TERRAIN
-                ]
-            },
-            // streetViewControl: true,
-            fullscreenControl: true,
-            // zoomControl: true,
-            scaleControl: true,
-            rotateControl: true,
-            gestureHandling: 'cooperative',
-            disableDefaultUI: false
+  initAutocomplete();
+  initLocationButton();
+
+  // Load industries based on map view (NOT GPS)
+  google.maps.event.addListenerOnce(map, "idle", () => {
+    searchIndustriesNearLocation(map.getCenter());
+  });
+
+  map.addListener("click", () => {
+    if (activeInfoWindow) {
+      activeInfoWindow.close();
+      activeInfoWindow = null;
+    }
+  });
+}
+
+// ================================
+// USER-TRIGGERED GPS (ONLY HERE)
+// ================================
+function getUserLocation() {
+  if (!navigator.geolocation) {
+    alert("Geolocation not supported");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userLocation = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        accuracy: pos.coords.accuracy
+      };
+
+      locationConfirmed = true;
+
+      if (currentLocationMarker) currentLocationMarker.setMap(null);
+
+      currentLocationMarker = new google.maps.Marker({
+        map,
+        position: userLocation,
+        icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+      });
+
+      map.setCenter(userLocation);
+      map.setZoom(15);
+
+      searchIndustriesNearLocation(userLocation);
+    },
+    err => {
+      alert("Unable to get location. Please enable GPS.");
+      console.warn(err.message);
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 0,
+      timeout: 20000
+    }
+  );
+}
+
+// ================================
+// NEARBY INDUSTRY SEARCH
+// ================================
+function searchIndustriesNearLocation(location) {
+  if (!google.maps.places || !location) return;
+
+  clearMarkers();
+  seenPlaces.clear();
+
+  const { radius, limit } = getIndustryConfigByZoom(map.getZoom());
+  const service = new google.maps.places.PlacesService(map);
+  let count = 0;
+
+  INDUSTRY_KEYWORDS.forEach(keyword => {
+    service.nearbySearch(
+      { location, radius, keyword },
+      (results, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK) return;
+
+        results.forEach(place => {
+          if (count >= limit) return;
+          if (seenPlaces.has(place.place_id)) return;
+
+          seenPlaces.add(place.place_id);
+          addMarker(place.geometry.location, place.name, place.vicinity);
+          count++;
         });
-        
-        // Trigger resize to ensure map renders correctly
-        google.maps.event.trigger(map, 'resize');
-
-        // Initialize services
-        geocoder = new google.maps.Geocoder();
-        directionsService = new google.maps.DirectionsService();
-        directionsRenderer = new google.maps.DirectionsRenderer();
-        directionsRenderer.setMap(map);
-
-        // Initialize info window
-        infoWindow = new google.maps.InfoWindow();
-
-        // Initialize autocomplete for search
-        initAutocomplete();
-
-        // Add default marker at center
-        addMarker(center, "Default Location", "This is the default center point");
-
-        // Add search functionality
-        initSearchFunctionality();
-
-        // Add location tracking
-        initLocationTracking();
-
-        console.log("Map initialized successfully!");
-    } catch (error) {
-        console.error("Error initializing map:", error);
-        document.getElementById("map").innerHTML = '<div style="padding: 20px; text-align: center; color: red;">Error: ' + error.message + '</div>';
-    }
-}
-
-// Initialize autocomplete for search box
-function initAutocomplete() {
-    const searchBox = document.getElementById("search-box");
-    if (searchBox) {
-        autocomplete = new google.maps.places.Autocomplete(searchBox, {
-            types: ['geocode', 'establishment'],
-            fields: ['geometry', 'name', 'formatted_address', 'place_id']
-        });
-
-        autocomplete.bindTo('bounds', map);
-
-        autocomplete.addListener('place_changed', function() {
-            const place = autocomplete.getPlace();
-            if (!place.geometry) {
-                console.log("No details available for input: '" + place.name + "'");
-                return;
-            }
-
-            // Center map on selected place
-            if (place.geometry.viewport) {
-                map.fitBounds(place.geometry.viewport);
-            } else {
-                map.setCenter(place.geometry.location);
-                map.setZoom(17);
-            }
-
-            // Add marker for searched location
-            addMarker(place.geometry.location, place.name || "Searched Location", place.formatted_address || "");
-        });
-    }
-}
-
-// Initialize search functionality
-function initSearchFunctionality() {
-    const searchBox = document.getElementById("search-box");
-    const searchIcon = document.querySelector(".search-icon");
-
-    if (searchIcon) {
-        searchIcon.addEventListener('click', function() {
-            performSearch();
-        });
-    }
-
-    if (searchBox) {
-        searchBox.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                performSearch();
-            }
-        });
-    }
-}
-
-// Perform search using geocoding
-function performSearch() {
-    const searchBox = document.getElementById("search-box");
-    const query = searchBox.value.trim();
-
-    if (!query) {
-        alert("Please enter a location to search");
-        return;
-    }
-
-    geocoder.geocode({ address: query }, function(results, status) {
-        if (status === 'OK') {
-            if (results[0]) {
-                const location = results[0].geometry.location;
-                
-                // Center map on result
-                map.setCenter(location);
-                map.setZoom(15);
-
-                // Add marker
-                addMarker(location, results[0].formatted_address, results[0].formatted_address);
-            } else {
-                alert("No results found for: " + query);
-            }
-        } else {
-            alert("Geocoding failed: " + status);
-        }
-    });
-}
-
-// Add marker to map
-function addMarker(position, title, description) {
-    const marker = new google.maps.Marker({
-        position: position,
-        map: map,
-        title: title,
-        animation: google.maps.Animation.DROP
-    });
-
-    // Add click listener to marker
-    marker.addListener('click', function() {
-        showInfoWindow(marker, title, description);
-    });
-
-    markers.push(marker);
-    return marker;
-}
-
-// Show info window
-function showInfoWindow(marker, title, content) {
-    const infoContent = `
-        <div style="padding: 10px;">
-            <h3 style="margin: 0 0 10px 0; font-size: 16px;">${title}</h3>
-            <p style="margin: 0; font-size: 14px; color: #666;">${content}</p>
-            <button onclick="removeMarker(${markers.indexOf(marker)})" style="margin-top: 10px; padding: 5px 10px; background: #ff4444; color: white; border: none; border-radius: 5px; cursor: pointer;">Remove Marker</button>
-        </div>
-    `;
-    
-    infoWindow.setContent(infoContent);
-    infoWindow.open(map, marker);
-}
-
-// Remove marker
-function removeMarker(index) {
-    if (index >= 0 && index < markers.length) {
-        markers[index].setMap(null);
-        markers.splice(index, 1);
-        infoWindow.close();
-    }
-}
-
-// Clear all markers
-function clearAllMarkers() {
-    markers.forEach(marker => marker.setMap(null));
-    markers = [];
-    infoWindow.close();
-}
-
-// Initialize location tracking
-function initLocationTracking() {
-    if (navigator.geolocation) {
-        // Add button for getting current location
-        addLocationButton();
-    } else {
-        console.log("Geolocation is not supported by this browser.");
-    }
-}
-
-// Add location button to map
-function addLocationButton() {
-    const locationButton = document.createElement("button");
-    locationButton.textContent = "📍 My Location";
-    locationButton.style.cssText = `
-        margin: 10px;
-        padding: 10px 15px;
-        background-color: #fff;
-        border: 2px solid #fff;
-        border-radius: 3px;
-        box-shadow: 0 2px 6px rgba(0,0,0,.3);
-        
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 500;
-    `;
-    
-    locationButton.addEventListener("click", getCurrentLocation);
-    
-    // Place the custom location button in the bottom-right corner.
-    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(locationButton);
-}
-
-// Get current location
-function getCurrentLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                const pos = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-
-                // Remove previous location marker
-                if (currentLocationMarker) {
-                    currentLocationMarker.setMap(null);
-                }
-
-                // Add current location marker
-                currentLocationMarker = new google.maps.Marker({
-                    position: pos,
-                    map: map,
-                    title: "Your Current Location",
-                    icon: {
-                        url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-                    },
-                    animation: google.maps.Animation.BOUNCE
-                });
-
-                // Center map on current location
-                map.setCenter(pos);
-                map.setZoom(15);
-
-                // Show info window
-                geocoder.geocode({ location: pos }, function(results, status) {
-                    if (status === 'OK' && results[0]) {
-                        showInfoWindow(currentLocationMarker, "Your Current Location", results[0].formatted_address);
-                    } else {
-                        showInfoWindow(currentLocationMarker, "Your Current Location", "Lat: " + pos.lat + ", Lng: " + pos.lng);
-                    }
-                });
-
-                // Stop bounce animation after 2 seconds
-                setTimeout(function() {
-                    if (currentLocationMarker) {
-                        currentLocationMarker.setAnimation(null);
-                    }
-                }, 2000);
-            },
-            function() {
-                alert("Error: The Geolocation service failed.");
-            }
-        );
-    } else {
-        alert("Error: Your browser doesn't support geolocation.");
-    }
-}
-
-// Calculate distance between two points
-function calculateDistance(point1, point2) {
-    return google.maps.geometry.spherical.computeDistanceBetween(
-        new google.maps.LatLng(point1.lat, point1.lng),
-        new google.maps.LatLng(point2.lat, point2.lng)
+      }
     );
+  });
 }
 
-// Get directions between two points
-function getDirections(origin, destination, travelMode = 'DRIVING') {
-    directionsService.route({
-        origin: origin,
-        destination: destination,
-        travelMode: google.maps.TravelMode[travelMode]
-    }, function(response, status) {
-        if (status === 'OK') {
-            directionsRenderer.setDirections(response);
-        } else {
-            alert('Directions request failed due to ' + status);
-        }
-    });
-}
+// ================================
+// TEXT SEARCH ("near me" ONLY IF CONFIRMED)
+// ================================
+function geocodePlaceAndSearch(placeDescription, fullQuery) {
+  const geocoder = new google.maps.Geocoder();
 
-// Clear directions
-function clearDirections() {
-    directionsRenderer.setDirections({ routes: [] });
-}
-
-// Fit map to show all markers
-function fitBoundsToMarkers() {
-    if (markers.length === 0) return;
-
-    const bounds = new google.maps.LatLngBounds();
-    markers.forEach(marker => {
-        bounds.extend(marker.getPosition());
-    });
-    map.fitBounds(bounds);
-}
-
-// Change map type
-function setMapType(mapTypeId) {
-    map.setMapTypeId(mapTypeId);
-}
-
-// Set map zoom level
-function setZoom(level) {
-    map.setZoom(level);
-}
-
-// Pan to location
-function panToLocation(lat, lng) {
-    map.panTo({ lat: lat, lng: lng });
-}
-
-// Export functions for global access
-window.mapFunctions = {
-    addMarker,
-    removeMarker,
-    clearAllMarkers,
-    getCurrentLocation,
-    performSearch,
-    getDirections,
-    clearDirections,
-    fitBoundsToMarkers,
-    setMapType,
-    setZoom,
-    panToLocation,
-    calculateDistance
-};
-
-// Handle API loading errors
-window.gm_authFailure = function() {
-    console.error("Google Maps API authentication failed. Please check your API key.");
-    const mapElement = document.getElementById("map");
-    if (mapElement) {
-        mapElement.innerHTML = '<div style="padding: 20px; text-align: center; color: red; background: white; border-radius: 10px; margin: 20px;">Google Maps API authentication failed. Please check your API key in the HTML file.</div>';
+  geocoder.geocode({ address: placeDescription }, (results, status) => {
+    if (status !== "OK" || !results[0]) {
+      runTextSearch(fullQuery, map.getCenter());
+      return;
     }
+
+    const location = results[0].geometry.location;
+
+    // 🔒 LOCK LOCATION FIRST
+    map.setCenter(location);
+    map.setZoom(13);
+
+    // 🔍 THEN SEARCH
+    runTextSearch(fullQuery, location);
+  });
+}
+
+
+function detectPlaceFromQuery(query, callback) {
+  const service = new google.maps.places.AutocompleteService();
+
+  service.getPlacePredictions(
+    {
+      input: query,
+      types: ["geocode"], // ✅ broader & correct
+    },
+    (predictions, status) => {
+      if (
+        status === google.maps.places.PlacesServiceStatus.OK &&
+        predictions &&
+        predictions.length > 0
+      ) {
+        callback(predictions[0]);
+      } else {
+        callback(null);
+      }
+    }
+  );
+}
+
+
+function searchByTextQuery(query) {
+  const lower = query.toLowerCase();
+
+  // ---------- CASE 1: NEAR ME ----------
+  if (lower.includes("near me")) {
+    if (!locationConfirmed || !userLocation) {
+      alert("Click 'My Location' to enable near me search");
+      return;
+    }
+
+    const cleaned = query.replace(/near me/gi, "").trim();
+    runTextSearch(cleaned || query, userLocation);
+    return;
+  }
+
+  // ---------- CASE 2: DETECT PLACE ----------
+  detectPlaceFromQuery(query, prediction => {
+    if (prediction) {
+      geocodePlaceAndSearch(prediction.description, query);
+    } else {
+      // ---------- CASE 3: FALLBACK ----------
+      runTextSearch(query, map.getCenter());
+    }
+  });
+}
+
+function runTextSearch(query, location) {
+  if (!query || !location) return;
+
+  clearMarkers();
+
+  const service = new google.maps.places.PlacesService(map);
+
+  service.textSearch(
+    {
+      query,
+      location,
+      radius: 15000,
+    },
+    (results, status) => {
+      if (status !== google.maps.places.PlacesServiceStatus.OK) return;
+
+      results.slice(0, 30).forEach(place => {
+        addMarker(
+          place.geometry.location,
+          place.name,
+          place.formatted_address
+        );
+      });
+    }
+  );
+}
+
+
+// ================================
+// AUTOCOMPLETE + ENTER
+// ================================
+function initAutocomplete() {
+  const input = document.getElementById("search-box");
+  if (!input) return;
+
+  autocomplete = new google.maps.places.Autocomplete(input);
+
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      searchByTextQuery(input.value.trim());
+    }
+  });
+}
+
+// ================================
+// LOCATION BUTTON (ONLY SOURCE OF GPS)
+// ================================
+function initLocationButton() {
+  const btn = document.createElement("button");
+  btn.textContent = "📍 My Location";
+  btn.style.cssText = `
+    margin:10px;
+    padding:8px 12px;
+    background:#fff;
+    cursor:pointer;
+    font-weight:500;
+  `;
+  btn.onclick = getUserLocation;
+
+  map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(btn);
+}
+
+// ================================
+// MARKERS
+// ================================
+function addMarker(position, title, description = "") {
+  const marker = new google.maps.Marker({ map, position, title });
+
+  const infoWindow = new google.maps.InfoWindow({
+    content: `
+      <div style="font-family:Arial;min-width:220px">
+        <div style="font-weight:600">${title}</div>
+        <div style="font-size:13px;color:#555">${description || ""}</div>
+        <a target="_blank"
+           href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(title)}"
+           style="color:#1a73e8;font-size:13px;text-decoration:none">
+          View on Google Maps
+        </a>
+      </div>
+    `
+  });
+
+  marker.addListener("click", () => {
+    if (activeInfoWindow) activeInfoWindow.close();
+    infoWindow.open(map, marker);
+    activeInfoWindow = infoWindow;
+  });
+
+  markers.push(marker);
+}
+
+function clearMarkers() {
+  markers.forEach(m => m.setMap(null));
+  markers = [];
+}
+
+// ================================
+// API ERROR
+// ================================
+window.gm_authFailure = function () {
+  document.getElementById("map").innerHTML =
+    "<h3 style='color:red'>Google Maps API key error</h3>";
 };
