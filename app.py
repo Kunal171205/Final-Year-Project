@@ -1,3 +1,4 @@
+from enum import unique
 from flask import Flask, render_template, request, redirect, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -19,31 +20,56 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-
-class User(db.Model):
+class Worker(db.Model):
+    __tablename__ = "worker"
     id = db.Column(db.Integer, primary_key=True)
+
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
-    role = db.Column(db.String(20), nullable=False, default="user")  # user / business
+    email = db.Column(db.String(128), unique=True ,nullable=False)
+    phone_no = db.Column(db.String(20), nullable=False)
 
-    def __repr__(self):
-        return f"<User {self.username} ({self.role})>"
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Company(db.Model):
+    __tablename__ = "company"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # LOGIN CREDENTIALS
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(128), nullable=False)
+
+    # COMPANY DETAILS
+    company_name = db.Column(db.String(120), nullable=False)
+    company_category = db.Column(db.String(120), nullable=False)
+    company_location = db.Column(db.String(120), nullable=False)
+    company_contact = db.Column(db.String(20), nullable=False)
+    company_address = db.Column(db.String(256), nullable=False)
+    company_website = db.Column(db.String(120), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
 
 class JobPOST(db.Model):
-    __tablename__ = 'job_post'
+    __tablename__ = "job_post"
+
     job_id = db.Column(db.Integer, primary_key=True)
+
+    company_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=False)
+
     job_title = db.Column(db.String(80), nullable=False)
     job_category = db.Column(db.String(128), nullable=False)
     job_location = db.Column(db.String(128), nullable=False)
+    job_specific_location = db.Column(db.String(128), nullable=False)
     job_experience = db.Column(db.String(128), nullable=False)
     job_shift = db.Column(db.String(128), nullable=False)
     job_salary = db.Column(db.String(128), nullable=False)
     job_contact = db.Column(db.String(128), nullable=False)
     job_description = db.Column(db.Text, nullable=False)
-    posted_by = db.Column(db.String(80), nullable=False)  # Store business username/email
 
-    def __repr__(self):
-        return f"<JobPOST {self.job_title} at {self.job_location}>"
+    company = db.relationship('Company', backref='jobs')
+
 
 
 class Application(db.Model):
@@ -57,9 +83,12 @@ class Application(db.Model):
     applicant_skill = db.Column(db.String(120), nullable=False)
     applicant_experience = db.Column(db.String(120), nullable=False)
     applicant_expected_salary = db.Column(db.String(120), nullable=False)
+    applicant_location = db.Column(db.String(120), nullable=False)
+    applicant_preferred_shift = db.Column(db.String(120), nullable=False)
     applicant_status = db.Column(db.String(20), nullable=False, default="pending")
     application_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    applicant_username = db.Column(db.String(80), nullable=False)  # Link to user who applied
+    worker_id = db.Column(db.Integer, db.ForeignKey("worker.id"), nullable=False)
+  # Link to user who applied
 
     # Relationship to JobPOST
     job = db.relationship('JobPOST', backref='applications')
@@ -115,84 +144,15 @@ def index():
     # Legacy route used by old template; just reuse home page
     return redirect(url_for("home"))
 
+@app.route("/dashboard")
+def dashboard():
+    if session.get("user_type") == "worker":
+        return redirect(url_for("workerprofile"))
 
+    if session.get("user_type") == "company":
+        return redirect(url_for("companyprofile"))
 
-# ===================== SIGNUP =====================
-@app.route("/signup", methods=["GET", "POST"])
-def signup():
-    if request.method == "POST":
-        # Worker / normal user signup
-        username = request.form.get("username") or request.form.get("Username")
-        password = request.form.get("password") or request.form.get("Password")
-
-        if not username or not password:
-            return "Username and password are required", 400
-
-        # Check if username already exists
-        existing = User.query.filter_by(username=username).first()
-        if existing:
-            return "Username already taken", 400
-
-        user = User(username=username, password=password, role="user")
-        db.session.add(user)
-        db.session.commit()
-
-        # Log in the new user
-        session["user"] = user.username
-        session["role"] = user.role
-        return redirect(url_for("dashboard"))
-
-    return render_template("signup.html")
-
-
-@app.route("/businesssignup", methods=["GET", "POST"])
-def businesssignup():
-    if request.method == "POST":
-        # Business signup – we use email as the unique username key
-        email = request.form.get("email")
-        password = request.form.get("password") or request.form.get("Password")
-
-        if not email or not password:
-            return "Email and password are required", 400
-
-        existing = User.query.filter_by(username=email).first()
-        if existing:
-            return "Company already registered with this email", 400
-
-        user = User(username=email, password=password, role="business")
-        db.session.add(user)
-        db.session.commit()
-
-        session["user"] = user.username
-        session["role"] = user.role
-        return redirect(url_for("dashboard"))
-
-    return render_template("signup-business.html")
-
-
-# ===================== LOGIN =====================
-@app.route("/loginpage", methods=["GET", "POST"])
-def login():
-    # If already logged in, don't show the login form again
-    if "user" in session and "role" in session:
-        return redirect(url_for("dashboard"))
-
-    if request.method == "POST":
-        username = request.form.get("username") or request.form.get("Username")
-        password = request.form.get("password") or request.form.get("Password")
-
-        # Look up user in the database
-        user = User.query.filter_by(username=username).first()
-        if user and user.password == password:
-            session["user"] = user.username
-            session["role"] = user.role
-            return redirect(url_for("dashboard"))
-
-        return "Invalid credentials"
-
-    # GET request: coming from /logintype with ?user_type=...
-    user_type = request.args.get("user_type", "user")
-    return render_template("login.html", user_type=user_type)
+    return redirect(url_for("logintype"))
 
 
 @app.route("/logintype")
@@ -200,55 +160,159 @@ def logintype():
     return render_template("LoginHomePage.html")
 
 
-# ===================== DASHBOARD =====================
-@app.route("/dashboard")
-def dashboard():
-    
-    if session.get("role") == "user":
-        return redirect(url_for("workerprofile"))
+# ===================== SIGNUP =====================
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "GET":
+        return render_template("signup.html")
 
-    if session.get("role") == "business":
-        return redirect(url_for("companyprofile"))
+    username = request.form.get("username")
+    email = request.form.get("email")
+    password = request.form.get("password")
+    phone_no = request.form.get("phone_no")
 
-    return redirect(url_for("login"))
+    if not all([username, email, password, phone_no]):
+        return "All fields are required", 400
+
+   
+    existing = Worker.query.filter_by(username=username).first()
+    if existing:
+        return "Username already taken", 400
+
+    worker = Worker(
+        username=username,
+        email=email,
+        password=password,
+        phone_no=phone_no
+    )
+
+    db.session.add(worker)
+    db.session.commit()
+
+    session["worker_id"] = worker.id
+    session["user_type"] = "worker"
+
+    return redirect(url_for("workerprofile"))
+
+
+# ================= BUSINESS SIGNUP =================
+@app.route("/businesssignup", methods=["GET", "POST"])
+def businesssignup():
+
+    # ---------- SHOW FORM ----------
+    if request.method == "GET":
+        return render_template("signup-business.html")
+
+    # ---------- READ FORM DATA ----------
+    email = request.form.get("email")
+    password = request.form.get("password")
+    company_name = request.form.get("company_name")
+    company_category = request.form.get("company_category")
+    company_location = request.form.get("company_location")
+    company_contact = request.form.get("company_contact")
+    company_address = request.form.get("company_address")
+    company_website = request.form.get("company_website")
+
+    # ---------- VALIDATION ----------
+    if not all([
+        email, password, company_name,
+        company_category, company_location,
+        company_contact, company_address
+    ]):
+        return "All required fields must be filled", 400
+
+    # ---------- DUPLICATE EMAIL CHECK ----------
+    existing_company = Company.query.filter_by(email=email).first()
+    if existing_company:
+        return "Company already registered with this email", 400
+
+    # ---------- CREATE COMPANY ----------
+    company = Company(
+        email=email,
+        password=password,  # (hash later)
+        company_name=company_name,
+        company_category=company_category,
+        company_location=company_location,
+        company_contact=company_contact,
+        company_address=company_address,
+        company_website=company_website
+    )
+
+    db.session.add(company)
+    db.session.commit()
+
+    # ---------- SESSION ----------
+    session.clear()
+    session["company_id"] = company.id
+    session["user_type"] = "company"
+
+    return redirect(url_for("companyprofile"))
+
+
+
+
+# ===================== LOGIN =====================
+@app.route("/loginpage", methods=["GET", "POST"])
+def login():
+    user_type = request.args.get("user_type")
+
+    if request.method == "GET":
+        if user_type not in ["worker", "company"]:
+            return redirect(url_for("logintype"))
+        return render_template("login.html", user_type=user_type)
+
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+    # ---------- WORKER LOGIN ----------
+    if user_type == "worker":
+        worker = Worker.query.filter_by(email=email).first()
+        if worker and worker.password == password:
+            session["worker_id"] = worker.id
+            session["user_type"] = "worker"
+            return redirect(url_for("workerprofile"))
+
+    # ---------- COMPANY LOGIN ----------
+    if user_type == "company":
+        company = Company.query.filter_by(email=email).first()
+        if company and company.password == password:
+            session["company_id"] = company.id
+            session["user_type"] = "company"
+            return redirect(url_for("companyprofile"))
+
+    return "Invalid credentials", 401
+
 
 
 # ===================== USER (WORKER) ROUTES =====================
 @app.route("/workerprofile")
 def workerprofile():
-    if session.get("role") != "user":
-        return redirect(url_for("dashboard"))
+    if session.get("user_type") != "worker":
+        return redirect(url_for("login"))
 
-    # Get all applications by this user
-    username = session.get("user")
-    user_applications = Application.query.filter_by(
-        applicant_username=username
-    ).order_by(Application.application_date.desc()).all()
+    worker = Worker.query.get(session["worker_id"])
 
-    # Get job details for each application
-    applications_with_jobs = []
-    for app in user_applications:
-        job = JobPOST.query.get(app.job_id)
-        applications_with_jobs.append({
-            'application': app,
-            'job': job
-        })
+    applications = Application.query.filter_by(
+        worker_id=worker.id
+    ).all()
 
-    return render_template("worker-profile.html", 
-                         applications=applications_with_jobs,
-                         username=username)
-
+    return render_template(
+        "worker-profile.html",
+        worker=worker,
+        applications=applications
+    )
 
 @app.route("/jobportal")
 def jobportal():
-    role = session.get("role")
+    role = session.get("user_type") 
+
 
     # If not logged in at all, send to login type selector page
     if role is None:
         return redirect(url_for("logintype"))
 
     # Only normal users can see the job portal
-    if role != "user":
+    if role != "worker":
         return redirect(url_for("dashboard"))
 
     # Fetch all jobs from database
@@ -258,7 +322,7 @@ def jobportal():
 
 @app.route("/apply", methods=["GET", "POST"])
 def applyjob():
-    if session.get("role") != "user":
+    if session.get("user_type") != "worker":
         return redirect(url_for("dashboard"))
 
     # Get job_id from query parameter
@@ -275,11 +339,13 @@ def applyjob():
         applicant_skill = request.form.get("applicant_skill")
         applicant_experience = request.form.get("applicant_experience")
         applicant_expected_salary = request.form.get("applicant_expected_salary")
+        applicant_preferred_shift = request.form.get("applicant_preferred_shift")
+        applicant_location = request.form.get("applicant_location")
 
         # Validate required fields
         if not all([job_id, applicant_name, applicant_email, applicant_phone, 
                    applicant_age, applicant_gender, applicant_skill, 
-                   applicant_experience, applicant_expected_salary]):
+                   applicant_experience, applicant_expected_salary, applicant_location, applicant_preferred_shift]):
             return "All fields are required", 400
 
         # Check if job exists
@@ -290,8 +356,9 @@ def applyjob():
         # Check if user already applied for this job
         existing_application = Application.query.filter_by(
             job_id=job_id,
-            applicant_username=session.get("user")
+            worker_id=session["worker_id"]
         ).first()
+
         
         if existing_application:
             return "You have already applied for this job", 400
@@ -299,6 +366,7 @@ def applyjob():
         # Create new application
         application = Application(
             job_id=int(job_id),
+            worker_id=session["worker_id"],
             applicant_name=applicant_name,
             applicant_email=applicant_email,
             applicant_phone=applicant_phone,
@@ -307,7 +375,8 @@ def applyjob():
             applicant_skill=applicant_skill,
             applicant_experience=applicant_experience,
             applicant_expected_salary=applicant_expected_salary,
-            applicant_username=session.get("user")
+            applicant_location=applicant_location,
+            applicant_preferred_shift=applicant_preferred_shift
         )
 
         db.session.add(application)
@@ -331,117 +400,136 @@ def applyjob():
 # ===================== BUSINESS ROUTES =====================
 @app.route("/companyprofile")
 def companyprofile():
-    if session.get("role") != "business":
-        return redirect(url_for("dashboard"))
+    if session.get("user_type") != "company":
+        return redirect(url_for("login"))
 
-    return render_template("company-profile.html")
+    company = Company.query.get(session["company_id"])
+
+    jobs = JobPOST.query.filter_by(company_id=company.id).all()
+    sell_items = sellitem.query.filter_by(
+        posted_by=company.email
+    ).order_by(sellitem.sell_date.desc()).all()
+
+    buy_items = buyitem.query.filter_by(
+        posted_by=company.email
+    ).order_by(buyitem.buy_date.desc()).all()
+
+    
+    total_b2b_listings = len(sell_items) + len(buy_items)
+
+    return render_template(
+        "company-profile.html",
+        company=company,
+        jobs=jobs,
+        sell_items=sell_items,
+        buy_items=buy_items,
+        total_jobs_posted=len(jobs),
+        total_b2b_listings=total_b2b_listings
+    )
+
 
 
 @app.route("/jobpost", methods=["GET", "POST"])
 def jobpost():
-    if session.get("role") != "business":
-        return redirect(url_for("dashboard"))
+    if session.get("user_type") != "company":
+        return redirect(url_for("login"))
 
     if request.method == "POST":
-        # Get form data
-        job_title = request.form.get("job_title")
-        job_category = request.form.get("job_category")
-        job_location = request.form.get("job_location")
-        job_experience = request.form.get("job_experience")
-        job_shift = request.form.get("job_shift")
-        job_salary = request.form.get("job_salary")
-        job_contact = request.form.get("job_contact")
-        job_description = request.form.get("job_description")
-
-        # Validate required fields
-        if not all([job_title, job_category, job_location, job_experience, 
-                   job_shift, job_salary, job_contact, job_description]):
-            return "All fields are required", 400
-
-        # Create new job post
         job = JobPOST(
-            job_title=job_title,
-            job_category=job_category,
-            job_location=job_location,
-            job_experience=job_experience,
-            job_shift=job_shift,
-            job_salary=job_salary,
-            job_contact=job_contact,
-            job_description=job_description,
-            posted_by=session.get("user", "unknown")
+            company_id=session["company_id"],
+            job_title=request.form.get("job_title"),
+            job_category=request.form.get("job_category"),
+            job_location=request.form.get("job_location"),
+            job_specific_location=request.form.get("job_specific_location"),
+            job_experience=request.form.get("job_experience"),
+            job_shift=request.form.get("job_shift"),
+            job_salary=request.form.get("job_salary"),
+            job_contact=request.form.get("job_contact"),
+            job_description=request.form.get("job_description"),
         )
 
         db.session.add(job)
         db.session.commit()
-
-        # Redirect to company profile with success message
         return redirect(url_for("companyprofile"))
 
     return render_template("post-job.html")
 
 
+
 @app.route("/application")
 def application():
-    if session.get("role") != "business":
+    if session.get("user_type") != "company":
         return redirect(url_for("dashboard"))
 
-    # Get job_id from query parameter (optional - to filter by job)
     job_id = request.args.get("job_id")
-    business_username = session.get("user")
+    company_id = session["company_id"]
 
-    # Get all jobs posted by this business
-    business_jobs = JobPOST.query.filter_by(posted_by=business_username).all()
-    
+    # All jobs posted by this company
+    business_jobs = JobPOST.query.filter_by(company_id=company_id).all()
+
     if job_id:
-        # Show applications for a specific job
         job = JobPOST.query.get(job_id)
-        if not job or job.posted_by != business_username:
-            return "Job not found", 404
-        
+
+        # ✅ FIX: check ownership using company_id
+        if not job or job.company_id != company_id:
+            return "Job not found or unauthorized", 404
+
         applications = Application.query.filter_by(job_id=job_id).order_by(
             Application.application_date.desc()
         ).all()
-        
-        # Ensure job relationship is loaded
-        for app in applications:
-            if not app.job:
-                app.job = JobPOST.query.get(app.job_id)
-        
-        return render_template("view-applications.html", 
-                             applications=applications, 
-                             job=job,
-                             all_jobs=business_jobs)
+
+        return render_template(
+            "view-applications.html",
+            applications=applications,
+            job=job,
+            all_jobs=business_jobs
+        )
+
+    # ---------- SHOW ALL APPLICATIONS ----------
+    if business_jobs:
+        job_ids = [job.job_id for job in business_jobs]
+        applications = Application.query.filter(
+            Application.job_id.in_(job_ids)
+        ).order_by(Application.application_date.desc()).all()
     else:
-        # Show all applications for all jobs posted by this business
-        if business_jobs:
-            job_ids = [job.job_id for job in business_jobs]
-            applications = Application.query.filter(
-                Application.job_id.in_(job_ids)
-            ).order_by(Application.application_date.desc()).all()
-            
-            # Ensure job relationships are loaded
-            for app in applications:
-                if not app.job:
-                    app.job = JobPOST.query.get(app.job_id)
-        else:
-            applications = []
-        
-        return render_template("view-applications.html", 
-                             applications=applications, 
-                             job=None,
-                             all_jobs=business_jobs)
+        applications = []
+
+    return render_template(
+        "view-applications.html",
+        applications=applications,
+        job=None,
+        all_jobs=business_jobs
+    )
+
+
+@app.route("/cancel_application/<int:app_id>", methods=["POST"])
+def cancel_application(app_id):
+    if session.get("user_type") != "worker":
+        return redirect(url_for("dashboard"))
+
+    application = Application.query.get_or_404(app_id)
+
+
+    # Only allow cancel if pending
+    if application.applicant_status != "pending":
+        return "Cannot cancel this application", 400
+
+    db.session.delete(application)
+    db.session.commit()
+
+    return redirect(url_for("workerprofile"))
 
 
 # ===================== B2B (OPTIONAL BUSINESS PAGES) =====================
 @app.route("/homeb2b")
 def b2bhome():
-    role = session.get("role")
+    role = session.get("user_type")
 
     # If not logged in at all, send to login type selector page
     if role is None:
         return redirect(url_for("logintype"))
 
-    if role != "business":
+    if role != "company":
         return redirect(url_for("dashboard"))
 
     return render_template("b2b-home.html")
@@ -449,66 +537,58 @@ def b2bhome():
 
 @app.route("/b2bsell", methods=["GET", "POST"])
 def b2bpost():
-    if session.get("role") != "business":
+    if session.get("user_type") != "company":
         return redirect(url_for("dashboard"))
 
     if request.method == "POST":
-        # Get form data
         sell_name = request.form.get("sell_name")
         sell_category = request.form.get("sell_category")
-        sell_quantity = request.form.get("sell_quantity")
+        sell_quantity_raw = request.form.get("sell_quantity")
         sell_location = request.form.get("sell_location")
-        sell_price = request.form.get("sell_price")
+        sell_price_raw = request.form.get("sell_price")
         sell_description = request.form.get("sell_description")
-        sell_image = request.form.get("sell_image", "")  # Optional image URL
+        sell_image = request.form.get("sell_image")
 
-        # Validate required fields
-        if not all([sell_name, sell_quantity, sell_price, sell_description]):
-            return "Name, quantity, price, and description are required", 400
+        # ---------- VALIDATION ----------
+        if not all([sell_name, sell_quantity_raw, sell_price_raw, sell_description]):
+            return "All required fields must be filled", 400
 
-        try:
-            # Convert price - handle various formats (₹45,000, 45000, 45/kg, etc.)
-            price_str = sell_price.replace('₹', '').replace(',', '').replace(' ', '').strip()
-            # Extract just the number part (handle cases like "45/kg" or "45000")
-            price_match = re.search(r'[\d.]+', price_str)
-            if price_match:
-                price_float = float(price_match.group())
-            else:
-                return "Invalid price format. Please enter a number.", 400
-            
-            # Convert quantity - extract number from string
-            quantity_match = re.search(r'\d+', sell_quantity)
-            if quantity_match:
-                quantity_int = int(quantity_match.group())
-            else:
-                return "Invalid quantity format. Please enter a number.", 400
-        except (ValueError, AttributeError):
-            return "Invalid price or quantity format", 400
+        # ---------- PRICE CLEAN ----------
+        price_match = re.search(r'[\d.]+', sell_price_raw.replace(',', ''))
+        if not price_match:
+            return "Invalid price format", 400
+        sell_price = float(price_match.group())
 
-        # Create new sell item
+        # ---------- QUANTITY CLEAN ----------
+        qty_match = re.search(r'\d+', sell_quantity_raw)
+        if not qty_match:
+            return "Invalid quantity format", 400
+        sell_quantity = int(qty_match.group())
+
+        # ---------- CREATE SELL ITEM ----------
         sell_item = sellitem(
             sell_name=sell_name,
             sell_category=sell_category or "General",
-            sell_quantity=quantity_int,
+            sell_quantity=sell_quantity,
             sell_location=sell_location or "Not specified",
-            sell_price=price_float,
+            sell_price=sell_price,
             sell_description=sell_description,
             sell_image=sell_image,
-            posted_by=session.get("user", "unknown")
+            sell_status="available",
+            posted_by=Company.query.get(session["company_id"]).email
         )
 
         db.session.add(sell_item)
         db.session.commit()
 
-        # Redirect to B2B home with success
-        return redirect(url_for("b2bhome"))
+        return redirect(url_for("companyprofile"))
 
     return render_template("b2b-post.html")
 
 
 @app.route("/b2bbuy")
 def buyerlist():
-    if session.get("role") != "business":
+    if session.get("user_type") != "company":
         return redirect(url_for("dashboard"))
 
     # Fetch all available sell items
@@ -526,7 +606,7 @@ def buyerlist():
 
 @app.route("/hostseller", methods=["GET", "POST"])
 def hostseller():
-    if session.get("role") != "business":
+    if session.get("user_type") != "company":
         return redirect(url_for("dashboard"))
 
     if request.method == "POST":

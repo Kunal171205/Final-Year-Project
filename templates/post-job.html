@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Post Job | Industrial Explorer</title>
-  <link rel="stylesheet" href="{{url_for('static' ,filename = 'css/post-job.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/post-job.css') }}">
 </head>
 <body>
 
@@ -12,12 +12,12 @@
   <div class="logo">Industrial Explorer</div>
   <nav>
     {# If logged in, show Profile + Logout, else show Login #}
-        {% if session.get('role') == 'user' %}
+        {% if session.get('user_type') == 'worker' %}
             <a href="{{ url_for('home') }}">Home</a>
             <a href="{{ url_for('jobportal') }}">Job Portal</a>
             <a href="{{ url_for('workerprofile') }}">Profile</a>
             <a href="{{ url_for('logout') }}">Logout</a>
-        {% elif session.get('role') == 'business' %}
+        {% elif session.get('user_type') == 'company' %}
             <a href="{{ url_for('home') }}">Home</a>
             <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
             <a href="{{ url_for('companyprofile') }}">Profile</a>
@@ -51,6 +51,14 @@
         <option value="Welder">Welder</option>
         <option value="Electrician">Electrician</option>
         <option value="Helper">Helper</option>
+        <option value="Supervisor">Supervisor</option>
+        <option value="Quality Inspector">Quality Inspector</option>
+        <option value="Forklift Operator">Forklift Operator</option>
+        <option value="Packaging Staff">Packaging Staff</option>
+        <option value="Loader / Unloader">Loader / Unloader</option>
+        <option value="Security Guard">Security Guard</option>
+        <option value="Driver">Driver</option>
+        
       </select>
 
       <label>Location (MIDC)</label>
@@ -60,7 +68,18 @@
         <option value="Pimpri MIDC">Pimpri MIDC</option>
         <option value="Talegaon MIDC">Talegaon MIDC</option>
         <option value="Bhosari MIDC">Bhosari MIDC</option>
+        <option value="Tathawade MIDC">Tathawade MIDC</option>
+        <option value="Khed MIDC">Khed MIDC</option>
+        <option value="Kharadi MIDC">Kharadi MIDC</option>
+        <option value="Hinjewadi MIDC">Hinjewadi MIDC</option>
       </select>
+
+      <label>Specific Location / Landmark</label>
+      <input
+        type="text"
+        name="job_specific_location"
+        placeholder="e.g., Near Gate 3, Plot No. 25, Phase 2"
+        required>
 
       <label>Experience Required</label>
       <select name="job_experience">
@@ -79,13 +98,17 @@
       <label>Salary Range</label>
       <input type="text" name="job_salary" placeholder="₹12,000 – ₹18,000" required>
 
-      <label>Contact Number</label>
-      <input type="text" name="job_contact" placeholder="+91 XXXXXXXXXX" required>
+      <div class="form-group">
+        <label>Company Phone Number</label>
+        <input type="tel" name="job_contact"
+               placeholder="10-digit phone number"
+               pattern="[0-9]{10}" maxlength="10" required>
+        </div>
 
       <label>Job Description</label>
       <textarea name="job_description" rows="4" placeholder="Work details, overtime, benefits..." required></textarea>
 
-      <button type="submit">Post Job</button>
+      <button type="submit"> Job</button>
 
     </form>
   </div>

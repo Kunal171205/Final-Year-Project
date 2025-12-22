@@ -155,3 +155,45 @@ button:hover {
     display: none;
   }
 }
+/* ================= USER SKILLS TEXTAREA ================= */
+
+.apply-card label {
+  display: block;
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.apply-card textarea {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 6px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  resize: vertical;        /* user can resize up/down only */
+  min-height: 70px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Focus effect */
+.apply-card textarea:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.4);
+}
+
+/* Placeholder styling */
+.apply-card textarea::placeholder {
+  color: #999;
+  font-size: 13px;
+}
+
+/* Mobile responsive */
+@media (max-width: 600px) {
+  .apply-card textarea {
+    font-size: 13px;
+    padding: 9px;
+  }
+}

@@ -3,31 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <title>My Profile | Industrial Explorer</title>
-  <link rel="stylesheet" href="{{url_for('static',filename='css/worker-profile.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/worker-profile.css') }}">
 </head>
+
 <body>
 
 <!-- HEADER -->
 <header class="top-header">
   <div class="logo">Industrial Explorer</div>
   <nav>
-    {# If logged in, show Profile + Logout, else show Login #}
-        {% if session.get('role') == 'user' %}
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('jobportal') }}">Job Portal</a>
-            <a href="{{ url_for('workerprofile') }}">Profile</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-        {% elif session.get('role') == 'business' %}
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
-            <a href="{{ url_for('companyprofile') }}">Profile</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-        {% else %}
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('jobportal') }}">Job Portal</a>
-        <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
-            <a href="{{ url_for('logintype') }}">Login</a>
-        {% endif %}
+    {% if session.get('user_type') == 'worker' %}
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('jobportal') }}">Job Portal</a>
+      <a href="{{ url_for('workerprofile') }}">Profile</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    {% elif session.get('user_type') == 'company' %}
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
+      <a href="{{ url_for('companyprofile') }}">Profile</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('jobportal') }}">Job Portal</a>
+      <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
+      <a href="{{ url_for('logintype') }}">Login</a>
+    {% endif %}
   </nav>
 </header>
 
@@ -39,46 +39,59 @@
     <div class="profile-header">
       <div class="avatar">👷</div>
       <div>
-        <h2>{{ username }}</h2>
+        <h2>{{ worker.username }}</h2>
         <p>Worker Profile</p>
       </div>
     </div>
 
     <div class="profile-info">
-      <div><strong>Username:</strong> {{ username }}</div>
+      <div><strong>Username:</strong> {{ worker.username }}</div>
       <div><strong>Total Applications:</strong> {{ applications|length }}</div>
     </div>
   </div>
 
   <!-- APPLIED JOBS -->
-  <div class="jobs-card">
-    <h3>Applied Jobs</h3>
+  <!-- APPLIED JOBS -->
+<div class="jobs-card">
+  <h3>Applied Jobs</h3>
 
-    {% if applications %}
-      {% for item in applications %}
-      <div class="job-row">
-        <div>
-          <h4>{{ item.job.job_title if item.job else 'Job Not Found' }}</h4>
-          <p>{{ item.job.job_category if item.job else 'N/A' }} – {{ item.job.job_location if item.job else 'N/A' }}</p>
-          <p style="font-size: 0.9em; color: #666;">
-            Applied: {{ item.application.application_date.strftime('%Y-%m-%d') if item.application.application_date else 'N/A' }}
-          </p>
-        </div>
-        <span class="status {{ item.application.applicant_status }}">
-          {{ item.application.applicant_status|title }}
+  {% if applications %}
+    {% for item in applications %}
+    <div class="job-row">
+
+      <div class="job-details">
+        <h4>{{ item.job.job_title }}</h4>
+        <p>{{ item.job.job_category }} – {{ item.job.job_location }}</p>
+
+        <p class="applied-date">
+          Applied: {{ item.application_date.strftime('%Y-%m-%d') }}
+        </p>
+      </div>
+
+      <div class="job-actions">
+        <span class="status {{ item.applicant_status }}">
+          {{ item.applicant_status|title }}
         </span>
-      </div>
-      {% endfor %}
-    {% else %}
-      <div class="job-row">
-        <div>
-          <p>You haven't applied for any jobs yet.</p>
-          <a href="{{ url_for('jobportal') }}">Browse Jobs</a>
-        </div>
-      </div>
-    {% endif %}
 
-  </div>
+        {% if item.applicant_status == 'pending' %}
+        <form method="POST"
+              action="{{ url_for('cancel_application', app_id=item.application_id) }}">
+          <button type="submit"
+                  class="cancel-btn"
+                  onclick="return confirm('Cancel this application?')">
+            Cancel
+          </button>
+        </form>
+        {% endif %}
+      </div>
+
+    </div>
+    {% endfor %}
+  {% else %}
+    <p>You haven't applied for any jobs yet.</p>
+    <a href="{{ url_for('jobportal') }}">Browse Jobs</a>
+  {% endif %}
+</div>
 
 </div>
 

@@ -88,7 +88,12 @@ function initMap() {
   });
 
   initAutocomplete();
-  initLocationButton();
+
+  // Attach My Location button under Area section
+  const myLocationBtn = document.getElementById("my-location-btn");
+  if (myLocationBtn) {
+    myLocationBtn.onclick = getUserLocation;
+  }
 
   // Initial load
   google.maps.event.addListenerOnce(map, "idle", () => {

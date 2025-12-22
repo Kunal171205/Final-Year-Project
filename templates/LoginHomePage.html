@@ -38,7 +38,7 @@
             </p>
             
             <!-- Use the correct Flask endpoint name "login" and fix the extra quote -->
-            <a href="{{ url_for('login', user_type='business') }}" class="btn-login">Login</a> 
+            <a href="{{ url_for('login', user_type='company') }}" class="btn-login">Login</a> 
 
             <div class="auth-footer">
                 <p>Don't have an account?</p>
@@ -57,7 +57,7 @@
             </p>
             
             <!-- Use the same role key "user" that app.py/dashboard expects -->
-            <a href="{{ url_for('login', user_type='user') }}" class="btn-login">Login</a> 
+            <a href="{{ url_for('login', user_type='worker') }}" class="btn-login">Login</a> 
 
             <div class="auth-footer">
                 <p>Don't have an account?</p>

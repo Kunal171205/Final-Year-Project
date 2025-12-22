@@ -10,12 +10,12 @@
   <div class="logo">Industrial Explorer</div>
   <nav class="top-nav">
     {# If logged in, show Profile + Logout, else show Login #}
-        {% if session.get('role') == 'user' %}
+        {% if session.get('user_type') == 'worker' %}
             <a href="{{ url_for('home') }}">Home</a>
             <a href="{{ url_for('jobportal') }}">Job Portal</a>
             <a href="{{ url_for('workerprofile') }}">Profile</a>
             <a href="{{ url_for('logout') }}">Logout</a>
-        {% elif session.get('role') == 'business' %}
+        {% elif session.get('user_type') == 'company' %}
             <a href="{{ url_for('home') }}">Home</a>
             <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
             <a href="{{ url_for('companyprofile') }}">Profile</a>

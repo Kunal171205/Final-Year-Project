@@ -18,12 +18,12 @@
 
     <nav class="top-nav">
         {# If logged in, show Profile + Logout, else show Login #}
-        {% if session.get('role') == 'user' %}
+        {% if session.get('user_type') == 'worker' %}
             <a href="{{ url_for('home') }}">Home</a>
             <a href="{{ url_for('jobportal') }}">Job Portal</a>
             <a href="{{ url_for('workerprofile') }}">Profile</a>
             <a href="{{ url_for('logout') }}">Logout</a>
-        {% elif session.get('role') == 'business' %}
+        {% elif session.get('user_type') == 'company' %}
             <a href="{{ url_for('home') }}">Home</a>
             <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
             <a href="{{ url_for('companyprofile') }}">Profile</a>
@@ -57,10 +57,15 @@
         <label>Area</label>
         <select>
             <option>All</option>
+            <option>Near by me</option>
             <option>MIDC Pune</option>
             <option>Chakan</option>
             <option>Ranjangaon</option>
         </select>
+
+        <button type="button" id="my-location-btn" class="apply-filter">
+             My Location
+        </button>
 
         <button class="apply-filter">Apply Filters</button>
     </aside>

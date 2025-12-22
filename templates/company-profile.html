@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Company Dashboard | Industrial Explorer</title>
-  <link rel="stylesheet" href="{{url_for('static' ,filename='css/company-profile.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/company-profile.css') }}">
 </head>
 <body>
 
@@ -12,12 +12,12 @@
   <div class="logo">Industrial Explorer</div>
   <nav>
     {# If logged in, show Profile + Logout, else show Login #}
-        {% if session.get('role') == 'user' %}
+        {% if session.get('user_type') == 'worker' %}
             <a href="{{ url_for('home') }}">Home</a>
             <a href="{{ url_for('jobportal') }}">Job Portal</a>
             <a href="{{ url_for('workerprofile') }}">Profile</a>
             <a href="{{ url_for('logout') }}">Logout</a>
-        {% elif session.get('role') == 'business' %}
+        {% elif session.get('user_type') == 'company' %}
             <a href="{{ url_for('home') }}">Home</a>
             <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
             <a href="{{ url_for('companyprofile') }}">Profile</a>
@@ -41,16 +41,17 @@
     <div class="company-header">
       <div class="avatar">🏭</div>
       <div>
-        <h2>ABC Industries Pvt Ltd</h2>
-        <p>Chakan MIDC • Manufacturing</p>
+        <h2> {{ company.company_name }} </h2>
+        <p> {{ company.company_location }} • {{ company.company_category }} </p>
       </div>
     </div>
 
     <div class="company-info">
-      <div><strong>Contact:</strong> +91 9876543210</div>
-      <div><strong>Email:</strong> abcindustries@gmail.com</div>
-      <div><strong>Total Jobs Posted:</strong> 5</div>
-      <div><strong>B2B Listings:</strong> 3</div>
+      <div><strong>Contact:</strong> {{ company.company_contact }}</div>
+      <div><strong>Email:</strong> {{ company.email }}</div>
+      <div><strong>Total Jobs Posted:</strong> {{ total_jobs_posted }}</div>
+      <div><strong>B2B Listings:</strong> {{ total_b2b_listings }}</div>
+      <div><strong>Company Location :</strong> {{ company.company_location }}</div> 
     </div>
 
     <!-- ACTION BUTTONS -->
@@ -63,44 +64,81 @@
   <!-- JOB STATUS -->
   <div class="section-card">
     <h3>Job Opportunities</h3>
-
-    <div class="row">
-      <div>
-        <h4>Machine Operator</h4>
-        <p>Chakan MIDC • Day Shift</p>
-      </div>
-      <span class="status active">Active</span>
-    </div>
-
-    <div class="row">
-      <div>
-        <h4>Factory Helper</h4>
-        <p>Pimpri MIDC • Rotational</p>
-      </div>
-      <span class="status closed">Closed</span>
-    </div>
+  
+    {% if jobs %}
+      {% for job in jobs %}
+        <div class="row">
+          <div>
+            <h4>{{ job.job_title }}</h4>
+            <p>
+              {{ job.job_location }} • {{ job.job_shift }}<br>
+              <small>{{ job.job_specific_location }}</small>
+            </p>
+          </div>
+  
+          <div class="job-actions">
+            <span class="status active">Active</span>
+            <a href="{{ url_for('application', job_id=job.job_id) }}"
+               class="btn small">
+              View Applications
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No jobs posted yet.</p>
+    {% endif %}
   </div>
+  
 
   <!-- B2B STATUS -->
-  <div class="section-card">
-    <h3>B2B Trade Status</h3>
+  <!-- B2B STATUS -->
+<div class="section-card">
+  <h3>B2B Sell Listings</h3>
 
-    <div class="row">
-      <div>
-        <h4>SELL • Steel Rods</h4>
-        <p>500 kg • Chakan MIDC</p>
-      </div>
-      <span class="status active">Live</span>
+{% if sell_items %}
+  {% for item in sell_items %}
+  <div class="row">
+    <div>
+      <h4>SELL • {{ item.sell_name }}</h4>
+      <p>
+        {{ item.sell_quantity }} units • {{ item.sell_location }} <br>
+        ₹{{ item.sell_price }}
+      </p>
     </div>
-
-    <div class="row">
-      <div>
-        <h4>BUY • Packaging Service</h4>
-        <p>Monthly Requirement</p>
-      </div>
-      <span class="status pending">Pending</span>
-    </div>
+    <span class="status {{ item.sell_status }}">
+      {{ item.sell_status|title }}
+    </span>
   </div>
+  {% endfor %}
+{% else %}
+  <p>No sell trades posted yet.</p>
+{% endif %}
+</div>
+
+<div class="section-card">
+  <h3>B2B Buy Requirements</h3>
+
+  {% if buy_items %}
+    {% for item in buy_items %}
+    <div class="row">
+      <div>
+        <h4>BUY • {{ item.buy_name }}</h4>
+        <p>
+          {{ item.buy_quantity }} units • {{ item.buy_location }} <br>
+          Budget: ₹{{ item.buy_budget if item.buy_budget else "Negotiable" }}
+        </p>
+      </div>
+      <span class="status {{ item.buy_status }}">
+        {{ item.buy_status|title }}
+      </span>
+    </div>
+    {% endfor %}
+  {% else %}
+    <p>No buy requirements yet.</p>
+  {% endif %}
+</div>
+
 
 </div>
 

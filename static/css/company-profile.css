@@ -149,6 +149,32 @@ nav a {
   padding: 15px 0;
   border-bottom: 1px solid #eee;
 }
+.job-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn.small {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: 8px;
+  background: #000;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.status.available { color: green; }
+.status.sold { color: red; }
+
+.status.open { color: orange; }
+.status.closed { color: gray; }
+
+
+.btn.small:hover {
+  opacity: 0.85;
+}
 
 .row:last-child {
   border-bottom: none;

@@ -3,67 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <title>Apply Job | Industrial Explorer</title>
-  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/apply-job.css') }}">
- 
+  <link rel="stylesheet"href="{{ url_for('static', filename='css/apply-job.css') }}">
 </head>
+
 <body>
 
-
+<!-- ================= HEADER ================= -->
 <header class="top-header">
   <div class="logo">Industrial Explorer</div>
   <nav>
-    {# If logged in, show Profile + Logout, else show Login #}
-        {% if session.get('role') == 'user' %}
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('jobportal') }}">Job Portal</a>
-            <a href="{{ url_for('workerprofile') }}">Profile</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-        {% elif session.get('role') == 'business' %}
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
-            <a href="{{ url_for('companyprofile') }}">Profile</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-        {% else %}
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('jobportal') }}">Job Portal</a>
-        <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
-            <a href="{{ url_for('logintype') }}">Login</a>
-        {% endif %}
+    {% if session.get('user_type') == 'worker' %}
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('jobportal') }}">Job Portal</a>
+      <a href="{{ url_for('workerprofile') }}">Profile</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    {% elif session.get('user_type') == 'company' %}
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
+      <a href="{{ url_for('companyprofile') }}">Profile</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('jobportal') }}">Job Portal</a>
+      <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
+      <a href="{{ url_for('logintype') }}">Login</a>
+    {% endif %}
   </nav>
 </header>
 
-<!-- PAGE CONTENT -->
+<!-- ================= PAGE CONTENT ================= -->
 <div class="page-container">
 
-  <!-- JOB DETAILS -->
+  <!-- ===== JOB DETAILS ===== -->
   {% if job %}
   <div class="job-summary">
+
     <h3>{{ job.job_title }}</h3>
-    <p>{{ job.job_category }} – {{ job.job_location }}</p>
-    <span>{{ job.job_shift }} • {{ job.job_salary }}</span>
-    <p class="job-desc">{{ job.job_description }}</p>
+
+    <p><strong>Company:</strong> {{ job.company_name }}</p>
+
+    <p>
+      <strong>Company Address:</strong><br>
+      {{ job.company_address_line1 }}<br>
+      {{ job.company_area }}, {{ job.company_city }}<br>
+      {{ job.company_state }} - {{ job.company_pincode }}
+    </p>
+
+    <p>
+      <strong>Category:</strong> {{ job.job_category }} |
+      <strong>Location:</strong> {{ job.job_location }}
+    </p>
+
+    <span>
+      {{ job.job_shift }} • {{ job.job_salary }}
+    </span>
+
+    <p class="job-desc">
+      {{ job.job_description }}
+    </p>
+
   </div>
   {% endif %}
 
-  <!-- APPLY FORM -->
+  <!-- ===== APPLY FORM ===== -->
   <div class="apply-card">
     <h4>Apply for this Job</h4>
 
     <form method="POST" action="{{ url_for('applyjob') }}">
+
       <input type="hidden" name="job_id" value="{{ job.job_id if job else '' }}">
 
+      <!-- FULL NAME -->
       <label>Full Name</label>
-      <input type="text" name="applicant_name" placeholder="Enter your name" required>
+      <input type="text" name="applicant_name" placeholder="Enter your full name" required>
 
+      <!-- EMAIL -->
       <label>Email</label>
       <input type="email" name="applicant_email" placeholder="your.email@example.com" required>
 
+      <!-- PHONE NUMBER -->
       <label>Phone Number</label>
-      <input type="tel" name="applicant_phone" placeholder="+91 XXXXXXXXXX" required>
+      <input 
+        type="tel"
+        name="applicant_phone"
+        placeholder="Enter 10-digit mobile number"
+        required
+        maxlength="10"
+        pattern="[0-9]{10}"
+        title="Please enter exactly 10 digits"
+        oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+      >
 
+      <!-- AGE -->
       <label>Age</label>
-      <input type="number" name="applicant_age" min="18" max="60" placeholder="Enter your age" required>
+      <input type="number" name="applicant_age" min="18" max="60" required>
 
+      <!-- GENDER -->
       <label>Gender</label>
       <select name="applicant_gender" required>
         <option value="">Select gender</option>
@@ -72,32 +107,46 @@
         <option value="Other">Other</option>
       </select>
 
-      <label>Skill / Job Type</label>
-      <select name="applicant_skill" required>
-        <option value="">Select skill</option>
-        <option value="Factory Worker">Factory Worker</option>
-        <option value="Machine Operator">Machine Operator</option>
-        <option value="Welder">Welder</option>
-        <option value="Electrician">Electrician</option>
-        <option value="Helper">Helper</option>
-      </select>
+      <!-- LOCATION -->
+      <label>Current Area / Location</label>
+      <input type="text" name="applicant_location" placeholder="Eg: Pimpri, Pune" required>
 
+      <!-- EXPERIENCE -->
       <label>Experience</label>
-      <select name="applicant_experience">
+      <select name="applicant_experience" required>
         <option value="Fresher">Fresher</option>
         <option value="1–2 Years">1–2 Years</option>
-        <option value="2+ Years">2+ Years</option>
+        <option value="2–4 Years">2–4 Years</option>
+        <option value="4+ Years">4+ Years</option>
       </select>
 
+      <!-- PREFERRED SHIFT -->
+      <label>Preferred Shift</label>
+      <select name="applicant_preferred_shift">
+        <option value="Any">Any</option>
+        <option value="Day">Day</option>
+        <option value="Night">Night</option>
+      </select>
+
+      <!-- USER SKILLS -->
+      <label>Your Skills</label>
+      <textarea 
+        name="applicant_skill"
+        rows="3"
+        placeholder="Example: Welding, Machine Operator, Electrician, Factory Helper"
+        required></textarea>
+
+      <!-- EXPECTED SALARY -->
       <label>Expected Salary (per month)</label>
       <input type="text" name="applicant_expected_salary" placeholder="₹12,000 – ₹20,000" required>
 
+      <!-- SUBMIT -->
       <button type="submit">Apply Job</button>
 
     </form>
 
     <p class="note">
-      The company will contact you directly.
+      The company will contact you directly if shortlisted.
     </p>
   </div>
 
