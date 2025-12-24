@@ -532,6 +532,31 @@ def companyprofile():
         total_b2b_listings=total_b2b_listings
     )
 
+@app.route("/company/update-profile", methods=["POST"])
+def update_company_profile():
+    if session.get("user_type") != "company":
+        return jsonify(success=False, message="Not logged in")
+
+    company = Company.query.get(session["company_id"])
+    if not company:
+        return jsonify(success=False, message="Company not found")
+
+    data = request.get_json()
+
+    company.company_name = data.get("company_name", company.company_name)
+    company.company_contact = data.get("company_contact", company.company_contact)
+    company.company_website = data.get("company_website", company.company_website)
+    company.company_address = data.get("company_address", company.company_address)
+
+    db.session.commit()
+
+    return jsonify(
+        success=True,
+        company_name=company.company_name,
+        company_contact=company.company_contact,
+        company_website=company.company_website,
+        company_address=company.company_address
+    )
 
 
 @app.route("/jobpost", methods=["GET", "POST"])

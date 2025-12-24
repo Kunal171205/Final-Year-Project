@@ -4,6 +4,55 @@
   <meta charset="UTF-8">
   <title>Company Dashboard | Industrial Explorer</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/company-profile.css') }}">
+  <script>
+    function enableCompanyEdit() {
+      toggleCompanyFields(true);
+    }
+  
+    function cancelCompanyEdit() {
+      toggleCompanyFields(false);
+    }
+  
+    function toggleCompanyFields(edit) {
+      document.querySelectorAll(".view-field").forEach(el =>
+        el.style.display = edit ? "none" : "inline"
+      );
+      document.querySelectorAll(".edit-field").forEach(el =>
+        el.style.display = edit ? "inline-block" : "none"
+      );
+  
+      document.getElementById("editCompanyBtn").style.display = edit ? "none" : "inline-block";
+      document.getElementById("saveCompanyBtn").style.display = edit ? "inline-block" : "none";
+      document.getElementById("cancelCompanyBtn").style.display = edit ? "inline-block" : "none";
+    }
+  
+    function saveCompanyProfile() {
+      fetch("/company/update-profile", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          company_name: document.getElementById("e-company-name").value,
+          company_contact: document.getElementById("e-company-contact").value,
+          company_website: document.getElementById("e-company-website").value,
+          company_address: document.getElementById("e-company-address").value
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          document.getElementById("v-company-name").innerText = data.company_name;
+          document.getElementById("v-company-contact").innerText = data.company_contact;
+          document.getElementById("v-company-website").innerText = data.company_website || "—";
+          document.getElementById("v-company-address").innerText = data.company_address;
+          toggleCompanyFields(false);
+        } else {
+          alert(data.message || "Update failed");
+        }
+      });
+    }
+  </script>
+  
 </head>
 <body>
 
@@ -40,18 +89,87 @@
   <div class="company-card">
     <div class="company-header">
       <div class="avatar">🏭</div>
+    
       <div>
-        <h2> {{ company.company_name }} </h2>
-        <p> {{ company.company_location }} • {{ company.company_category }} </p>
+        <!-- VIEW -->
+        <h2 class="view-field" id="v-company-name">{{ company.company_name }}</h2>
+    
+        <!-- EDIT -->
+        <input class="edit-field"
+               id="e-company-name"
+               value="{{ company.company_name }}"
+               style="display:none;">
+    
+        <p>{{ company.company_location }} • {{ company.company_category }}</p>
+      </div>
+    
+      <!-- ACTIONS -->
+      <div class="company-actions">
+        <button id="editCompanyBtn" class="btn black" onclick="enableCompanyEdit()">
+          Edit Profile
+        </button>
+    
+        <button id="saveCompanyBtn" class="btn green"
+                onclick="saveCompanyProfile()"
+                style="display:none;">
+          Save
+        </button>
+    
+        <button id="cancelCompanyBtn" class="btn black"
+                onclick="cancelCompanyEdit()"
+                style="display:none;">
+          Cancel
+        </button>
       </div>
     </div>
+    
 
     <div class="company-info">
-      <div><strong>Contact:</strong> {{ company.company_contact }}</div>
+      <div>
+        <strong>Contact:</strong>
+        <span class="view-field" id="v-company-contact">
+          {{ company.company_contact }}
+        </span>
+        <input class="edit-field"
+               id="e-company-contact"
+               value="{{ company.company_contact }}"
+               style="display:none;">
+      </div>
+      <div>
+        <strong>Website:</strong>
+        <span class="view-field" id="v-company-website">
+          {{ company.company_website or "—" }}
+        </span>
+        <input class="edit-field"
+               id="e-company-website"
+               value="{{ company.company_website }}"
+               style="display:none;">
+      </div>
+      
+      <div>
+        <strong>Address:</strong>
+        <span class="view-field" id="v-company-address">
+          {{ company.company_address }}
+        </span>
+        <input class="edit-field"
+               id="e-company-address"
+               value="{{ company.company_address }}"
+               style="display:none;">
+      </div>
+      <div>
+        <strong>Company Location:</strong>
+        <span class="view-field" id="v-company-location-info">
+          {{ company.company_location }}
+        </span>
+      
+        <input class="edit-field"
+               id="e-company-location-info"
+               value="{{ company.company_location }}"
+               style="display:none;">
+      </div>      
       <div><strong>Email:</strong> {{ company.email }}</div>
       <div><strong>Total Jobs Posted:</strong> {{ total_jobs_posted }}</div>
-      <div><strong>B2B Listings:</strong> {{ total_b2b_listings }}</div>
-      <div><strong>Company Location :</strong> {{ company.company_location }}</div> 
+      <div><strong>B2B Listings:</strong> {{ total_b2b_listings }}</div> 
     </div>
 
     <!-- ACTION BUTTONS -->
