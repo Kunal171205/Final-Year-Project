@@ -547,6 +547,7 @@ def update_company_profile():
     company.company_contact = data.get("company_contact", company.company_contact)
     company.company_website = data.get("company_website", company.company_website)
     company.company_address = data.get("company_address", company.company_address)
+    company.company_location = data.get("company_location", company.company_location)
 
     db.session.commit()
 
@@ -555,7 +556,8 @@ def update_company_profile():
         company_name=company.company_name,
         company_contact=company.company_contact,
         company_website=company.company_website,
-        company_address=company.company_address
+        company_address=company.company_address,
+        company_location=company.company_location
     )
 
 
@@ -630,6 +632,27 @@ def application():
         job=None,
         all_jobs=business_jobs
     )
+
+@app.route("/company/update-application-status", methods=["POST"])
+def update_application_status():
+    if session.get("user_type") != "company":
+        return jsonify(success=False, message="Unauthorized")
+
+    data = request.get_json()
+    app_id = data.get("application_id")
+    status = data.get("status")
+
+    if status not in ["selected", "rejected"]:
+        return jsonify(success=False, message="Invalid status")
+
+    application = Application.query.get(app_id)
+    if not application:
+        return jsonify(success=False, message="Application not found")
+
+    application.applicant_status = status
+    db.session.commit()
+
+    return jsonify(success=True)
 
 
 @app.route("/cancel_application/<int:app_id>", methods=["POST"])

@@ -35,7 +35,8 @@
           company_name: document.getElementById("e-company-name").value,
           company_contact: document.getElementById("e-company-contact").value,
           company_website: document.getElementById("e-company-website").value,
-          company_address: document.getElementById("e-company-address").value
+          company_address: document.getElementById("e-company-address").value,
+          company_location: document.getElementById("e-company-location-info").value
         })
       })
       .then(res => res.json())
@@ -45,6 +46,8 @@
           document.getElementById("v-company-contact").innerText = data.company_contact;
           document.getElementById("v-company-website").innerText = data.company_website || "—";
           document.getElementById("v-company-address").innerText = data.company_address;
+          document.getElementById("v-company-location").innerText = data.company_location;
+          document.getElementById("v-company-location-info").innerText = data.company_location;
           toggleCompanyFields(false);
         } else {
           alert(data.message || "Update failed");
@@ -100,7 +103,12 @@
                value="{{ company.company_name }}"
                style="display:none;">
     
-        <p>{{ company.company_location }} • {{ company.company_category }}</p>
+               <p>
+                <span class="view-field" id="v-company-location">
+                  {{ company.company_location }}
+                </span>
+                • {{ company.company_category }}
+              </p>              
       </div>
     
       <!-- ACTIONS -->

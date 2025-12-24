@@ -3,31 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <title>Applications | Industrial Explorer</title>
-  <link rel="stylesheet" href="{{url_for('static', filename='css/view-applications.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/view-applications.css') }}">
+
+  
 </head>
 <body>
 
 <header class="top-header">
   <div class="logo">Industrial Explorer</div>
   <nav>
-    {# If logged in, show Profile + Logout, else show Login #}
-        {% if session.get('user_type') == 'worker' %}
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('jobportal') }}">Job Portal</a>
-            <a href="{{ url_for('workerprofile') }}">Profile</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-        {% elif session.get('user_type') == 'company' %}
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
-            <a href="{{ url_for('companyprofile') }}">Profile</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-        {% else %}
-        <a href="{{ url_for('home') }}">Home</a>
-        <a href="{{ url_for('jobportal') }}">Job Portal</a>
-        <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
-            <a href="{{ url_for('logintype') }}">Login</a>
-        {% endif %}
-
+    {% if session.get('user_type') == 'worker' %}
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('jobportal') }}">Job Portal</a>
+      <a href="{{ url_for('workerprofile') }}">Profile</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    {% elif session.get('user_type') == 'company' %}
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
+      <a href="{{ url_for('companyprofile') }}">Profile</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('jobportal') }}">Job Portal</a>
+      <a href="{{ url_for('b2bhome') }}">B2B Trade</a>
+      <a href="{{ url_for('logintype') }}">Login</a>
+    {% endif %}
   </nav>
 </header>
 
@@ -41,22 +41,6 @@
     <p class="sub">Applications for all your posted jobs</p>
   {% endif %}
 
-  <!-- FILTER BY JOB -->
-  {% if all_jobs %}
-  <div style="margin-bottom: 20px;">
-    <label>Filter by Job:</label>
-    <select onchange="window.location.href=this.value ? '/application?job_id=' + this.value : '/application'">
-      <option value="">All Jobs</option>
-      {% for j in all_jobs %}
-      <option value="{{ j.job_id }}" {% if job and job.job_id == j.job_id %}selected{% endif %}>
-        {{ j.job_title }} - {{ j.job_location }}
-      </option>
-      {% endfor %}
-    </select>
-  </div>
-  {% endif %}
-
-  <!-- APPLICATION CARDS -->
   {% if applications %}
     {% for app in applications %}
     <div class="app-card">
@@ -65,18 +49,43 @@
         <p><strong>Job:</strong> {{ app.job.job_title if app.job else 'N/A' }}</p>
         <p><strong>Skill:</strong> {{ app.applicant_skill }}</p>
         <p><strong>Experience:</strong> {{ app.applicant_experience }}</p>
-        <p><strong>Age:</strong> {{ app.applicant_age }} | <strong>Gender:</strong> {{ app.applicant_gender }}</p>
+        <p><strong>Age:</strong> {{ app.applicant_age }} |
+           <strong>Gender:</strong> {{ app.applicant_gender }}</p>
         <p><strong>Expected Salary:</strong> {{ app.applicant_expected_salary }}</p>
         <p><strong>Email:</strong> {{ app.applicant_email }}</p>
-        <p><strong>Applied:</strong> {% if app.application_date %}{{ app.application_date.strftime('%Y-%m-%d %H:%M') }}{% else %}N/A{% endif %}</p>
-        <p><strong>Status:</strong> <span style="color: {% if app.applicant_status == 'selected' %}green{% elif app.applicant_status == 'rejected' %}red{% else %}orange{% endif %};">{{ app.applicant_status|title if app.applicant_status else 'N/A' }}</span></p>
+    
+        <p>
+          <strong>Status:</strong>
+          <span class="status-text {{ app.applicant_status }}">
+            {{ app.applicant_status|title }}
+          </span>
+        </p>
+    
+        <!-- ✅ CONTACT OPTIONS (ONLY WHEN SELECTED) -->
+        {% if app.applicant_status == 'selected' %}
+        <div class="contact-box">
+          <a href="tel:{{ app.applicant_phone }}" class="contact-btn call">📞 Call</a>
+          <a href="mailto:{{ app.applicant_email }}" class="contact-btn email">✉️ Email</a>
+          <a href="https://wa.me/91{{ app.applicant_phone }}" target="_blank"
+             class="contact-btn whatsapp">💬 WhatsApp</a>
+        </div>
+        {% endif %}
       </div>
-
-      <div class="actions">
-        <a href="tel:{{ app.applicant_phone }}" class="call" target="_blank">Call</a>
-        <a href="https://wa.me/{{ app.applicant_phone|replace('+', '')|replace(' ', '')|replace('-', '') }}" class="whatsapp" target="_blank">WhatsApp</a>
+    
+      <!-- ✅ ACTION BUTTONS (ONLY WHEN PENDING) -->
+      <div class="actions"
+           {% if app.applicant_status != 'pending' %}style="display:none;"{% endif %}>
+        <button class="accept"
+                onclick="updateStatus({{ app.application_id }}, 'selected', this)">
+          Accept
+        </button>
+    
+        <button class="reject"
+                onclick="updateStatus({{ app.application_id }}, 'rejected', this)">
+          Reject
+        </button>
       </div>
-    </div>
+    </div>    
     {% endfor %}
   {% else %}
     <div class="app-card">
@@ -86,5 +95,41 @@
 
 </div>
 
+<script>
+  function updateStatus(appId, status, button) {
+    fetch("/company/update-application-status", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        application_id: appId,
+        status: status
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const card = button.closest('.app-card');
+        const statusText = card.querySelector('.status-text');
+  
+        statusText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        statusText.className = "status-text " + status;
+  
+        // Disable both buttons
+        card.querySelectorAll('.actions button')
+            .forEach(btn => btn.disabled = true);
+      } else {
+        alert(data.message || "Update failed");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Server error");
+    });
+  }
+  </script>
+  
 </body>
 </html>
