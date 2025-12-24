@@ -1,9 +1,13 @@
 from enum import unique
-from flask import Flask, render_template, request, redirect, session, url_for
+from flask import Flask, render_template, request, redirect, session, url_for , jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 import re
+from werkzeug.utils import secure_filename
+import uuid
+from flask import flash
+
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key")
@@ -28,6 +32,19 @@ class Worker(db.Model):
     password = db.Column(db.String(128), nullable=False)
     email = db.Column(db.String(128), unique=True ,nullable=False)
     phone_no = db.Column(db.String(20), nullable=False)
+
+    # KYC documents (post-signup)
+    aadhar_card = db.Column(db.String(200), nullable=True)
+    pan_card = db.Column(db.String(200), nullable=True)
+    resume = db.Column(db.String(200), nullable=True)
+
+    # KYC workflow
+    kyc_status = db.Column(
+        db.String(20),
+        nullable=False,
+        default="pending"  
+        # pending | submitted | verified | rejected
+    )
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -195,6 +212,7 @@ def signup():
     return redirect(url_for("workerprofile"))
 
 
+
 # ================= BUSINESS SIGNUP =================
 @app.route("/businesssignup", methods=["GET", "POST"])
 def businesssignup():
@@ -301,6 +319,93 @@ def workerprofile():
         worker=worker,
         applications=applications
     )
+@app.route("/worker/upload-documents", methods=["POST"])
+def upload_worker_documents():
+    if session.get("user_type") != "worker":
+        return redirect(url_for("logintype"))
+
+    worker = Worker.query.get(session.get("worker_id"))
+    if not worker:
+        return redirect(url_for("logintype"))
+
+    upload_folder = "static/uploads"
+    os.makedirs(upload_folder, exist_ok=True)
+
+    # -------- AADHAR --------
+    aadhar = request.files.get("aadhar_card")
+    if aadhar and aadhar.filename:
+        aadhar_filename = f"{uuid.uuid4()}_{secure_filename(aadhar.filename)}"
+        aadhar.save(os.path.join(upload_folder, aadhar_filename))
+        worker.aadhar_card = aadhar_filename
+
+    # -------- PAN --------
+    pan = request.files.get("pan_card")
+    if pan and pan.filename:
+        pan_filename = f"{uuid.uuid4()}_{secure_filename(pan.filename)}"
+        pan.save(os.path.join(upload_folder, pan_filename))
+        worker.pan_card = pan_filename
+
+    # -------- RESUME --------
+    resume = request.files.get("resume")
+    if resume and resume.filename:
+        resume_filename = f"{uuid.uuid4()}_{secure_filename(resume.filename)}"
+        resume.save(os.path.join(upload_folder, resume_filename))
+        worker.resume = resume_filename
+
+    # -------- KYC STATUS --------
+    if worker.aadhar_card and worker.pan_card:
+        worker.kyc_status = "submitted"
+        session.pop("kyc_started", None)
+
+
+    db.session.commit()
+    flash("Document uploaded successfully.", "success")
+
+    return redirect(url_for("workerprofile"))
+
+@app.route("/worker/start-kyc")
+def start_kyc():
+    session["kyc_started"] = True
+    return "", 204
+
+from flask import request, jsonify, session
+
+@app.route("/worker/update-profile", methods=["POST"])
+def update_worker_profile():
+    try:
+        # ✅ Correct session check
+        if session.get("user_type") != "worker":
+            return jsonify(success=False, message="Not logged in")
+
+        worker_id = session.get("worker_id")
+        if not worker_id:
+            return jsonify(success=False, message="Worker session missing")
+
+        data = request.get_json()
+        if not data:
+            return jsonify(success=False, message="No data received")
+
+        worker = Worker.query.get(worker_id)
+        if not worker:
+            return jsonify(success=False, message="Worker not found")
+
+        # Update fields
+        worker.username = data.get("username", worker.username)
+        worker.email = data.get("email", worker.email)
+        worker.phone_no = data.get("phone_no", worker.phone_no)
+
+        db.session.commit()
+
+        return jsonify(
+            success=True,
+            username=worker.username,
+            email=worker.email,
+            phone_no=worker.phone_no
+        )
+
+    except Exception as e:
+        print("UPDATE ERROR:", e)
+        return jsonify(success=False, message=str(e))
 
 @app.route("/jobportal")
 def jobportal():

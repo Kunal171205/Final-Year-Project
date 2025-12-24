@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Worker Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static' ,filename='css/edit-worker-profile.css') }}">
+</head>
+<body>
+
+    <header class="simple-header">
+        <div class="simple-header-container">
+            <div class="logo">
+                <span class="logo-text">Industry<span class="logo-highlight">Explorer</span></span>
+            </div>
+        </div>
+    </header>
+
+    <div class="signup-container-wrapper">
+        <div class="signup-container">
+            <div class="signup-card">
+                <h2>Edit Worker Profile</h2>
+
+                <!-- Form: save to localStorage, then go back to worker profile page -->
+                <form class="signup-form" onsubmit="saveWorkerProfile(event)">
+                    <!-- USERNAME -->
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            placeholder="Enter your username"
+                            value="{{ worker.username }}"
+                            required
+                        >
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="Enter your email"
+                            value="{{ worker.email }}"
+                            required
+                        >
+                    </div>
+
+                    <!-- PHONE -->
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone_no"
+                            placeholder="Enter your phone number"
+                            value="{{ worker.phone_no }}"
+                            required
+                        >
+                    </div>
+
+                    <!-- LOCATION (optional example field) -->
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input
+                            type="text"
+                            id="location"
+                            name="location"
+                            placeholder="Enter your city / area"
+                            value="{{ worker.location }}"
+                        >
+                    </div>
+
+                    <!-- SKILLS (optional example field) -->
+                    <div class="form-group">
+                        <label for="skills">Skills</label>
+                        <textarea
+                            id="skills"
+                            name="skills"
+                            rows="3"
+                            placeholder="Mention your key skills"
+                        >{{ worker.skills }}</textarea>
+                    </div>
+
+                                        <!-- AADHAAR PDF UPLOAD -->
+                                        <div class="form-group">
+                                            <label for="aadhaar_pdf">Upload Aadhaar (PDF)</label>
+                                            <input
+                                                type="file"
+                                                id="aadhaar_pdf"
+                                                name="aadhaar_pdf"
+                                                accept="application/pdf"
+                                                required
+                                            >
+                                            <small>Please upload a clear scanned copy of your Aadhaar card in PDF format.</small>
+                                        </div>
+                    
+
+                    <!-- SUBMIT -->
+                    <button type="submit" class="btn-signup-submit">
+                        Save Changes
+                    </button>
+                </form>
+                                                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function saveWorkerProfile(event) {
+            event.preventDefault();
+
+            const profile = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                phone_no: document.getElementById('phone').value,
+                location: document.getElementById('location').value,
+                skills: document.getElementById('skills').value
+            };
+
+            // Save to browser storage
+            localStorage.setItem('workerProfile', JSON.stringify(profile));
+
+            // Go back to worker profile page
+            window.location.href = 'Work-profile.html';
+        }
+    </script>
+
+</body>
+</html>

@@ -3,7 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <title>My Profile | Industrial Explorer</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/worker-profile.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static' , filename='css/worker-profile.css' ) }}">
+  <script>
+    function scrollToKYC() {
+      const section = document.getElementById("kyc-section");
+    
+      fetch("/worker/start-kyc");
+      
+      section.style.display = "block";
+      section.style.opacity = 0;
+    
+      section.scrollIntoView({ behavior: "smooth" });
+    
+      let opacity = 0;
+      const fadeIn = setInterval(() => {
+        opacity += 0.05;
+        section.style.opacity = opacity;
+        if (opacity >= 1) clearInterval(fadeIn);
+      }, 20);
+    }
+    </script>
+    <script>
+      function showChangeForm(id) {
+        const form = document.getElementById(id);
+        if (!form) return;
+      
+        // Toggle visibility
+        form.style.display = (form.style.display === "flex") ? "none" : "flex";
+      }
+      </script>
+      <script>
+        function toggleProfileEdit(editMode) {
+          document.getElementById("profile-view").style.display =
+            editMode ? "none" : "block";
+          document.getElementById("profile-edit").style.display =
+            editMode ? "block" : "none";
+        }
+      </script>
+      <script>
+        function enableEdit() {
+          toggleFields(true);
+        }
+      
+        function cancelEdit() {
+          toggleFields(false);
+        }
+      
+        function toggleFields(editMode) {
+          document.querySelectorAll(".view-field").forEach(el => {
+            el.style.display = editMode ? "none" : "inline";
+          });
+      
+          document.querySelectorAll(".edit-field").forEach(el => {
+            el.style.display = editMode ? "inline-block" : "none";
+          });
+      
+          document.getElementById("editBtn").style.display =
+            editMode ? "none" : "inline-block";
+          document.getElementById("saveBtn").style.display =
+            editMode ? "inline-block" : "none";
+          document.getElementById("cancelBtn").style.display =
+            editMode ? "inline-block" : "none";
+        }
+      
+        function saveProfile() {
+          fetch("/worker/update-profile", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              username: document.getElementById("e-username").value,
+              email: document.getElementById("e-email").value,
+              phone_no: document.getElementById("e-phone").value
+            })
+          })
+          .then(res => res.json())
+          .then(data => {
+            console.log("Server response:", data);
+            if (data.success) {
+              document.getElementById("v-username").innerText = data.username;
+              document.getElementById("v-email").innerText = data.email;
+              document.getElementById("v-phone").innerText = data.phone_no;
+
+              toggleFields(false);
+            } else {
+              alert(data.message || "Update failed");
+           }
+          })
+          .catch(err => {
+            console.error("Fetch error:", err);
+            alert("Server error");
+          });
+        }
+      </script>
+      
+      
+      
+    
 </head>
 
 <body>
@@ -42,15 +140,242 @@
         <h2>{{ worker.username }}</h2>
         <p>Worker Profile</p>
       </div>
+      
+      
+  <div class="profile-actions">
+    <button id="editBtn"
+            class="edit-profile-btn"
+            onclick="enableEdit()">
+      Edit Profile
+    </button>
+
+    <button id="saveBtn"
+            class="save-btn"
+            onclick="saveProfile()"
+            style="display:none;">
+      Save
+    </button>
+
+    <button id="cancelBtn"
+            class="cancel-btn"
+            onclick="cancelEdit()"
+            style="display:none;">
+      Cancel
+    </button>
+  </div>
+
     </div>
 
-    <div class="profile-info">
+    <!-- <div class="profile-info">
       <div><strong>Username:</strong> {{ worker.username }}</div>
       <div><strong>Total Applications:</strong> {{ applications|length }}</div>
     </div>
+  </div> --><div class="profile-info">
+
+  <!-- USERNAME -->
+  <div>
+    <strong>Username:</strong>
+
+    <!-- VIEW -->
+    <span class="view-field" id="v-username">
+      {{ worker.username }}
+    </span>
+
+    <!-- EDIT -->
+    <input class="edit-field"
+           id="e-username"
+           type="text"
+           name="username"
+           value="{{ worker.username }}"
+           style="display:none;">
   </div>
 
-  <!-- APPLIED JOBS -->
+  <!-- EMAIL -->
+  <div>
+    <strong>Email:</strong>
+
+    <span class="view-field" id="v-email">
+      {{ worker.email }}
+    </span>
+
+    <input class="edit-field"
+           id="e-email"
+           type="email"
+           name="email"
+           value="{{ worker.email }}"
+           style="display:none;">
+  </div>
+
+  <!-- PHONE -->
+  <div>
+    <strong>Phone:</strong>
+
+    <span class="view-field" id="v-phone">
+      {{ worker.phone_no }}
+    </span>
+
+    <input class="edit-field"
+           id="e-phone"
+           type="text"
+           name="phone_no"
+           value="{{ worker.phone_no }}"
+           style="display:none;">
+  </div>
+
+  <div>
+    <strong>Total Applications:</strong> {{ applications|length }}
+  </div>
+
+</div>
+
+  
+  </div>
+
+  {% if worker.kyc_status == "pending" %}
+<div class="kyc-card">
+  <h3>KYC Status</h3>
+  <p class="kyc-pending">
+    ⚠️ KYC Pending – Aadhar & PAN verification required to apply for jobs.
+  </p>
+
+  <button class="do-kyc-btn" onclick="scrollToKYC()">
+    Do KYC
+  </button>
+</div>
+{% endif %}
+
+  <!-- DOCUMENT UPLOAD CARD -->
+  <div class="documents-card"
+     id="kyc-section"
+     {% if worker.kyc_status == "pending" and not session.get("kyc_started") %}style="display:none;"
+{% endif %}>
+
+  <h3>Upload Required Documents</h3>
+  <p class="doc-subtitle">
+    Aadhar Card and PAN Card are mandatory for job verification.
+    Resume is optional.
+  </p>
+
+  <h3>Documents</h3>
+
+<!-- AADHAR -->
+<div class="doc-row">
+  <strong>Aadhar Card:</strong>
+
+  <div class="doc-right">
+    {% if worker.aadhar_card %}
+      <div class="doc-actions">
+        <a href="{{ url_for('static', filename='uploads/' + worker.aadhar_card) }}"
+           target="_blank"
+           class="view-btn">View</a>
+
+        <button type="button"
+                class="change-btn"
+                onclick="showChangeForm('aadhar-form')">
+          Change
+        </button>
+      </div>
+
+      <form id="aadhar-form"
+            method="POST"
+            action="{{ url_for('upload_worker_documents') }}"
+            enctype="multipart/form-data"
+            class="change-form">
+        <input type="file" name="aadhar_card" required>
+        <button type="submit" class="upload-btn">Upload</button>
+      </form>
+    {% else %}
+      <form method="POST"
+            action="{{ url_for('upload_worker_documents') }}"
+            enctype="multipart/form-data">
+        <input type="file" name="aadhar_card" required>
+        <button type="submit" class="upload-btn">Upload</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+
+<!--PAN-->
+<div class="doc-row">
+  <strong>PAN Card:</strong>
+
+  <div class="doc-right">
+    {% if worker.pan_card %}
+      <div class="doc-actions">
+        <a href="{{ url_for('static', filename='uploads/' + worker.pan_card) }}"
+           target="_blank"
+           class="view-btn">View</a>
+
+        <button type="button"
+                class="change-btn"
+                onclick="showChangeForm('pan-form')">
+          Change
+        </button>
+      </div>
+
+      <form id="pan-form"
+            method="POST"
+            action="{{ url_for('upload_worker_documents') }}"
+            enctype="multipart/form-data"
+            class="change-form">
+        <input type="file" name="pan_card" required>
+        <button type="submit" class="upload-btn">Upload</button>
+      </form>
+    {% else %}
+      <form method="POST"
+            action="{{ url_for('upload_worker_documents') }}"
+            enctype="multipart/form-data">
+        <input type="file" name="pan_card" required>
+        <button type="submit" class="upload-btn">Upload</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+<!-- RESUME -->
+<div class="doc-row">
+  <strong>Resume:</strong>
+
+  <div class="doc-right">
+    {% if worker.resume %}
+      <div class="doc-actions">
+        <a href="{{ url_for('static', filename='uploads/' + worker.resume) }}"
+           target="_blank"
+           class="view-btn">
+          View
+        </a>
+
+        <button type="button"
+                class="change-btn"
+                onclick="showChangeForm('resume-form')">
+          Change
+        </button>
+      </div>
+
+      <form id="resume-form"
+            method="POST"
+            action="{{ url_for('upload_worker_documents') }}"
+            enctype="multipart/form-data"
+            class="change-form">
+        <input type="file" name="resume" accept=".pdf">
+        <button type="submit" class="upload-btn">Upload</button>
+      </form>
+
+    {% else %}
+      <form method="POST"
+            action="{{ url_for('upload_worker_documents') }}"
+            enctype="multipart/form-data">
+        <input type="file" name="resume" accept=".pdf">
+        <button type="submit" class="upload-btn">Upload</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+
+</div>
+
+
   <!-- APPLIED JOBS -->
 <div class="jobs-card">
   <h3>Applied Jobs</h3>
@@ -95,5 +420,3 @@
 
 </div>
 
-</body>
-</html>
